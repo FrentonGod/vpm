@@ -1,0 +1,76 @@
+/* ========================================
+   APP STYLES
+   ======================================== */
+
+.app {
+  min-height: 100vh;
+}
+
+/* --- SELECTOR DE VISTA --- */
+.vista-selector {
+  position: fixed;
+  top: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-fixed);
+  background: white;
+  border-radius: var(--radius-full);
+  padding: var(--space-xs);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  gap: var(--space-xs);
+  border: 1px solid var(--neutral-200);
+}
+
+.selector-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.625rem 1.25rem;
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--neutral-600);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.selector-btn:hover {
+  color: var(--neutral-900);
+  background: var(--neutral-50);
+}
+
+.selector-btn-active {
+  color: white;
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary) 0%,
+    var(--accent-primary-hover) 100%
+  );
+  box-shadow: 0 4px 12px rgba(118, 196, 197, 0.3);
+}
+
+.selector-btn svg {
+  flex-shrink: 0;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 640px) {
+  .vista-selector {
+    top: var(--space-md);
+    left: var(--space-md);
+    right: var(--space-md);
+    transform: none;
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+  }
+
+  .selector-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}

@@ -1,0 +1,341 @@
+/* ========================================
+   PANTALLA BIENVENIDA STYLES
+   ======================================== */
+
+.pantalla-bienvenida {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--neutral-50) 0%, #f0f9f9 100%);
+  padding: var(--space-2xl) var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bienvenida-container {
+  max-width: 720px;
+  width: 100%;
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* --- ILUSTRACIÓN --- */
+.bienvenida-ilustracion {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto var(--space-2xl);
+}
+
+.ilustracion-circle {
+  position: absolute;
+  border-radius: var(--radius-full);
+  opacity: 0.15;
+}
+
+.circle-1 {
+  width: 160px;
+  height: 160px;
+  background: var(--accent-primary);
+  top: 0;
+  left: 0;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.circle-2 {
+  width: 120px;
+  height: 120px;
+  background: var(--accent-primary);
+  top: 20px;
+  left: 20px;
+  animation: pulse 3s ease-in-out infinite 0.5s;
+}
+
+.circle-3 {
+  width: 80px;
+  height: 80px;
+  background: var(--accent-primary);
+  top: 40px;
+  left: 40px;
+  animation: pulse 3s ease-in-out infinite 1s;
+}
+
+.ilustracion-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  background: white;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-xl);
+  border: 3px solid var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* --- CONTENIDO --- */
+.bienvenida-content {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--neutral-200);
+}
+
+.bienvenida-titulo {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--neutral-900);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  letter-spacing: -0.03em;
+  background: linear-gradient(
+    135deg,
+    var(--neutral-900) 0%,
+    var(--accent-primary) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bienvenida-texto {
+  margin-bottom: var(--space-2xl);
+}
+
+.bienvenida-texto > p {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--neutral-700);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+/* --- INSTRUCCIONES CARD --- */
+.instrucciones-card {
+  background: var(--neutral-50);
+  border: 2px solid var(--neutral-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-lg);
+}
+
+.instrucciones-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  color: var(--accent-primary);
+}
+
+.instrucciones-header h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--neutral-900);
+}
+
+.instrucciones-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.instrucciones-lista li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--neutral-700);
+}
+
+.instrucciones-lista li svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent-primary);
+}
+
+.instrucciones-lista li strong {
+  color: var(--neutral-900);
+  font-weight: 600;
+}
+
+/* --- TIEMPO ESTIMADO --- */
+.tiempo-estimado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--accent-primary-light);
+  border-radius: var(--radius-md);
+  color: var(--accent-primary);
+  font-size: 0.9375rem;
+}
+
+.tiempo-estimado svg {
+  flex-shrink: 0;
+}
+
+.tiempo-estimado strong {
+  font-weight: 700;
+}
+
+/* --- ACCIONES --- */
+.bienvenida-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--neutral-200);
+}
+
+.bienvenida-acciones .btn {
+  min-width: 240px;
+}
+
+.texto-ayuda {
+  font-size: 0.875rem;
+  color: var(--neutral-500);
+  text-align: center;
+  margin: 0;
+}
+
+/* --- ANIMACIONES --- */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.15;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.25;
+  }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .pantalla-bienvenida {
+    padding: var(--space-lg);
+  }
+
+  .bienvenida-ilustracion {
+    width: 120px;
+    height: 120px;
+    margin-bottom: var(--space-xl);
+  }
+
+  .circle-1 {
+    width: 120px;
+    height: 120px;
+  }
+
+  .circle-2 {
+    width: 90px;
+    height: 90px;
+    top: 15px;
+    left: 15px;
+  }
+
+  .circle-3 {
+    width: 60px;
+    height: 60px;
+    top: 30px;
+    left: 30px;
+  }
+
+  .ilustracion-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .ilustracion-icon svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .bienvenida-content {
+    padding: var(--space-xl);
+  }
+
+  .bienvenida-titulo {
+    font-size: 1.75rem;
+  }
+
+  .bienvenida-texto > p {
+    font-size: 1rem;
+  }
+
+  .instrucciones-card {
+    padding: var(--space-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .pantalla-bienvenida {
+    padding: var(--space-md);
+  }
+
+  .bienvenida-ilustracion {
+    width: 100px;
+    height: 100px;
+  }
+
+  .circle-1 {
+    width: 100px;
+    height: 100px;
+  }
+
+  .circle-2 {
+    width: 75px;
+    height: 75px;
+    top: 12.5px;
+    left: 12.5px;
+  }
+
+  .circle-3 {
+    width: 50px;
+    height: 50px;
+    top: 25px;
+    left: 25px;
+  }
+
+  .ilustracion-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .ilustracion-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .bienvenida-content {
+    padding: var(--space-lg);
+  }
+
+  .bienvenida-titulo {
+    font-size: 1.5rem;
+  }
+
+  .instrucciones-card {
+    padding: var(--space-md);
+  }
+
+  .instrucciones-lista li {
+    font-size: 0.875rem;
+  }
+
+  .bienvenida-acciones .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
