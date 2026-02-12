@@ -1,7 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./PantallaFinalizada.css";
 
-const PantallaFinalizada = ({ nombreCompleto }) => {
+const PantallaFinalizada = () => {
+  const navigate = useNavigate();
+  const [nombreCompleto, setNombreCompleto] = useState("");
+
+  useEffect(() => {
+    // Obtener datos del evaluado desde sessionStorage
+    const datosGuardados = sessionStorage.getItem("datosEvaluado");
+    if (datosGuardados) {
+      const datos = JSON.parse(datosGuardados);
+      setNombreCompleto(datos.nombreCompleto || "Evaluado");
+    } else {
+      // Si no hay datos, redirigir al registro
+      navigate("/evaluado/registro");
+    }
+  }, [navigate]);
+
   // Extraer el primer nombre
   const primerNombre = nombreCompleto
     ? nombreCompleto.split(" ")[0]

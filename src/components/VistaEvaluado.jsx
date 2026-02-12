@@ -1,12 +1,24 @@
-import React, { useState } from "react";
-import PantallaFinalizada from "./PantallaFinalizada";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./VistaEvaluado.css";
 
-const VistaEvaluado = ({ datosEvaluado }) => {
+const VistaEvaluado = () => {
+  const navigate = useNavigate();
   const [preguntaActual, setPreguntaActual] = useState(0);
   const [respuestas, setRespuestas] = useState({});
   const [mostrarAyuda, setMostrarAyuda] = useState(false);
-  const [testFinalizado, setTestFinalizado] = useState(false);
+  const [datosEvaluado, setDatosEvaluado] = useState(null);
+
+  useEffect(() => {
+    // Obtener datos del evaluado desde sessionStorage
+    const datosGuardados = sessionStorage.getItem("datosEvaluado");
+    if (datosGuardados) {
+      setDatosEvaluado(JSON.parse(datosGuardados));
+    } else {
+      // Si no hay datos, redirigir al registro
+      navigate("/evaluado/registro");
+    }
+  }, [navigate]);
 
   // Datos de ejemplo del test
   const test = {
@@ -75,8 +87,9 @@ const VistaEvaluado = ({ datosEvaluado }) => {
 
   const handleFinalizar = () => {
     console.log("Test finalizado", respuestas);
-    setTestFinalizado(true);
     // Aquí iría la lógica para enviar las respuestas al backend
+    // Navegar a la pantalla de finalización
+    navigate("/evaluado/finalizado");
   };
 
   const handleSolicitarAyuda = () => {
@@ -87,15 +100,6 @@ const VistaEvaluado = ({ datosEvaluado }) => {
 
   const respuestaSeleccionada = respuestas[pregunta.id];
   const puedeAvanzar = respuestaSeleccionada !== undefined;
-
-  // Si el test está finalizado, mostrar la pantalla de agradecimiento
-  if (testFinalizado) {
-    return (
-      <PantallaFinalizada
-        nombreCompleto={datosEvaluado?.nombreCompleto || "Evaluado"}
-      />
-    );
-  }
 
   return (
     <div className="vista-evaluado">

@@ -1,111 +1,109 @@
-# Sistema de Orientación Vocacional - Flujo Completo
+# Sistema de Orientación Vocacional - Con Rutas
 
 ## 📋 Descripción del Sistema
 
 Sistema web de orientación vocacional que permite a asesores monitorear en tiempo real el progreso de múltiples evaluados mientras estos completan un test vocacional personalizado.
 
-## 🔄 Flujo del Sistema
+## 🔄 Rutas del Sistema
 
-### Para el Evaluado
+### Rutas del Asesor
 
-1. **Acceso al Sistema**
-   - El asesor genera un link/QR con la aplicación web
-   - El evaluado accede mediante el enlace proporcionado
+| Ruta      | Componente        | Descripción                        |
+| --------- | ----------------- | ---------------------------------- |
+| `/`       | Redirect          | Redirige a `/asesor`               |
+| `/asesor` | `DashboardAsesor` | Panel de monitorización del asesor |
 
-2. **Formulario de Registro** (`FormularioRegistro.jsx`)
-   - **Datos personales:**
-     - Nombre completo
-     - Número de teléfono (10 dígitos)
-     - Correo electrónico
-     - Fecha de nacimiento (con cálculo automático de edad)
-   - **Información académica:**
-     - ¿Ha concluido su bachillerato? (Sí/No)
-     - Si NO: Bachillerato de procedencia (dropdown)
-     - Si NO: Semestre actual (dropdown)
-     - Comunidad (dropdown)
-   - **Información de Mqerk Academy:**
-     - ¿Está tomando un curso en Mqerk Academy? (Sí/No)
-     - Si SÍ: Seleccionar curso (dropdown)
-   - **Aceptación:**
-     - Checkbox de términos y condiciones
-     - Botón "Siguiente"
+### Rutas del Evaluado
 
-3. **Pantalla de Bienvenida** (`PantallaBienvenida.jsx`)
-   - Saludo personalizado: "¡Bienvenido, [Primer Nombre]!"
-   - Instrucciones resumidas del test:
-     - 20 preguntas sobre intereses y preferencias
-     - No hay respuestas correctas o incorrectas
-     - Ser honesto consigo mismo
-     - Tomar tiempo para reflexionar
-     - Usar botón de asistencia si necesita ayuda
-     - Recibirá reporte personalizado al finalizar
-   - Tiempo estimado: 15-20 minutos
-   - Botón "Comenzar Test"
+| Ruta                   | Componente           | Descripción                     |
+| ---------------------- | -------------------- | ------------------------------- |
+| `/evaluado`            | Redirect             | Redirige a `/evaluado/registro` |
+| `/evaluado/registro`   | `FormularioRegistro` | Formulario de datos personales  |
+| `/evaluado/bienvenida` | `PantallaBienvenida` | Instrucciones del test          |
+| `/evaluado/test`       | `VistaEvaluado`      | Realización del test            |
+| `/evaluado/finalizado` | `PantallaFinalizada` | Pantalla de agradecimiento      |
 
-4. **Realización del Test** (`VistaEvaluado.jsx`)
-   - Interfaz minimalista sin distracciones
-   - Barra de progreso superior (#76C4C5)
-   - Preguntas una por una con opciones de respuesta
-   - Navegación anterior/siguiente
-   - Botón flotante de ayuda
-   - Indicadores de progreso
+## 🚀 Flujo del Evaluado
 
-### Para el Asesor
+```
+1. /evaluado/registro
+   ↓ (completa formulario)
+   ↓ (datos guardados en sessionStorage)
 
-**Dashboard de Monitorización** (`DashboardAsesor.jsx`)
+2. /evaluado/bienvenida
+   ↓ (lee instrucciones)
+   ↓ (click en "Comenzar Test")
 
-- Vista en tiempo real de todos los evaluados activos
-- Tarjetas de estado para cada evaluado mostrando:
-  - Nombre y avatar
-  - Progreso del test (%)
-  - Pregunta actual / Total
-  - Tiempo transcurrido
-  - Estado (En progreso / Completado)
-  - Indicador si necesita ayuda
-- Estadísticas generales:
-  - Total de evaluados activos
-  - Total completados
-  - Promedio de progreso
-  - Cantidad que necesitan ayuda
-- Botón "Brindar Asistencia" destacado para evaluados que lo soliciten
+3. /evaluado/test
+   ↓ (responde 20 preguntas)
+   ↓ (click en "Finalizar Test")
 
-## 🎨 Diseño Visual
+4. /evaluado/finalizado
+   ✓ (pantalla de agradecimiento)
+```
 
-### Paleta de Colores
+## 💾 Gestión de Datos
 
-- **Color Principal:** #76C4C5 (Turquesa)
-  - Botones de acción
-  - Barras de progreso
-  - Elementos seleccionados
-  - Indicadores activos
+### SessionStorage
 
-### Características de Diseño
+Los datos del evaluado se guardan en `sessionStorage` para persistir entre rutas:
 
-- ✅ Tipografía geométrica (Inter)
-- ✅ Bordes suavizados (border-radius moderado)
-- ✅ Espacios en blanco generosos
-- ✅ Jerarquía visual clara
-- ✅ Animaciones suaves
-- ✅ Diseño responsive
+```javascript
+// Guardar datos (en FormularioRegistro)
+sessionStorage.setItem("datosEvaluado", JSON.stringify(formData));
 
-## 📁 Estructura de Componentes
+// Leer datos (en otras rutas)
+const datosGuardados = sessionStorage.getItem("datosEvaluado");
+const datos = JSON.parse(datosGuardados);
+```
+
+### Protección de Rutas
+
+Todas las rutas del evaluado (excepto `/evaluado/registro`) verifican que existan datos en sessionStorage:
+
+```javascript
+useEffect(() => {
+  const datosGuardados = sessionStorage.getItem("datosEvaluado");
+  if (!datosGuardados) {
+    navigate("/evaluado/registro"); // Redirige si no hay datos
+  }
+}, [navigate]);
+```
+
+## 📁 Estructura de Archivos
 
 ```
 src/
-├── components/
-│   ├── FormularioRegistro.jsx       # Formulario inicial del evaluado
-│   ├── FormularioRegistro.css
-│   ├── PantallaBienvenida.jsx       # Pantalla de bienvenida e instrucciones
-│   ├── PantallaBienvenida.css
-│   ├── VistaEvaluado.jsx            # Interfaz del test
-│   ├── VistaEvaluado.css
-│   ├── DashboardAsesor.jsx          # Panel del asesor
-│   └── DashboardAsesor.css
-├── App.jsx                           # Controlador principal de flujo
-├── App.css
+├── App.jsx                           # Router principal con todas las rutas
+├── App.css                           # Estilos mínimos de la app
+├── main.jsx                          # Punto de entrada
 ├── index.css                         # Sistema de diseño Stitch
-└── main.jsx                          # Punto de entrada
+└── components/
+    ├── DashboardAsesor.jsx           # Dashboard del asesor
+    ├── DashboardAsesor.css
+    ├── FormularioRegistro.jsx        # Formulario inicial
+    ├── FormularioRegistro.css
+    ├── PantallaBienvenida.jsx        # Pantalla de bienvenida
+    ├── PantallaBienvenida.css
+    ├── VistaEvaluado.jsx             # Interfaz del test
+    ├── VistaEvaluado.css
+    ├── PantallaFinalizada.jsx        # Pantalla de agradecimiento
+    └── PantallaFinalizada.css
 ```
+
+## 🛠️ Tecnologías
+
+- **React 19** - Framework principal
+- **React Router DOM 7** - Manejo de rutas
+- **Vite** - Build tool y dev server
+- **CSS Modules** - Estilos por componente
+
+## 🎨 Diseño
+
+- **Sistema de diseño**: Stitch Design Language
+- **Color principal**: #76C4C5 (Turquesa)
+- **Tipografía**: Inter (Google Fonts)
+- **Responsive**: Desktop, Tablet, Móvil
 
 ## 🚀 Uso del Sistema
 
@@ -121,26 +119,35 @@ npm install
 npm run dev
 ```
 
-### Navegación (Demo)
+El servidor estará disponible en `http://localhost:5173`
 
-El selector flotante superior permite cambiar entre:
+### Navegación
 
-- **Dashboard Asesor**: Vista de monitorización
-- **Flujo Evaluado**: Formulario → Bienvenida → Test
+#### Para Asesores:
 
-## 📊 Estados del Sistema
+- Ir a: `http://localhost:5173/asesor`
+- Ver dashboard con evaluados activos
 
-### Estados del Evaluado
+#### Para Evaluados:
+
+- Ir a: `http://localhost:5173/evaluado`
+- Completar el flujo completo:
+  1. Registro
+  2. Bienvenida
+  3. Test
+  4. Finalización
+
+## 📊 Datos del Formulario
 
 ```javascript
 {
   nombreCompleto: string,
-  telefono: string,
+  telefono: string,           // 10 dígitos
   email: string,
   fechaNacimiento: date,
-  edad: number,
+  edad: number,               // Calculado automáticamente
   concluidoBachillerato: 'si' | 'no',
-  bachillerato: string,      // Solo si no ha concluido
+  bachillerato: string,       // Solo si no ha concluido
   semestre: string,           // Solo si no ha concluido
   comunidad: string,
   cursandoMqerk: 'si' | 'no',
@@ -149,15 +156,7 @@ El selector flotante superior permite cambiar entre:
 }
 ```
 
-### Flujo de Navegación
-
-```
-Evaluado: Formulario → Bienvenida → Test
-          ↓            ↓            ↓
-Estado:   'formulario' 'bienvenida' 'test'
-```
-
-## 🔧 Validaciones Implementadas
+## 🔐 Validaciones
 
 ### Formulario de Registro
 
@@ -165,88 +164,98 @@ Estado:   'formulario' 'bienvenida' 'test'
 - ✅ Teléfono de 10 dígitos
 - ✅ Email con formato válido
 - ✅ Fecha de nacimiento requerida
-- ✅ Cálculo automático de edad
 - ✅ Campos condicionales según respuestas
 - ✅ Términos y condiciones obligatorios
+- ✅ Botón deshabilitado sin aceptar términos
+
+### Navegación
+
+- ✅ Protección de rutas con sessionStorage
+- ✅ Redirección automática si faltan datos
+- ✅ Validación de respuestas antes de avanzar
 
 ## 📱 Responsive Design
 
-Breakpoints:
+### Breakpoints:
 
 - **Desktop**: > 768px
 - **Tablet**: 640px - 768px
 - **Mobile**: < 640px
 
-Adaptaciones:
+### Optimizaciones:
 
-- Grid de una columna en móvil
-- Formularios apilados verticalmente
-- Botones de ancho completo
-- Espaciado optimizado
+- ✅ Todas las opciones visibles sin scroll
+- ✅ Tamaños de fuente adaptativos
+- ✅ Padding y spacing optimizados
+- ✅ Botones táctiles adecuados
 
 ## 🎯 Características Destacadas
 
-### Formulario de Registro
+### FormularioRegistro
 
-- Campos condicionales que aparecen según las respuestas
-- Cálculo automático de edad al seleccionar fecha
+- Campos condicionales dinámicos
+- Cálculo automático de edad
 - Validación en tiempo real
-- Radio buttons y checkboxes personalizados
-- Dropdowns estilizados
+- Navegación a `/evaluado/bienvenida`
 
-### Pantalla de Bienvenida
+### PantallaBienvenida
 
 - Saludo personalizado con primer nombre
-- Instrucciones claras y concisas
-- Ilustración animada con círculos pulsantes
-- Tiempo estimado visible
-- Diseño acogedor y motivador
+- Instrucciones claras del test
+- Ilustración animada
+- Navegación a `/evaluado/test`
 
-### Vista del Test
+### VistaEvaluado
 
 - Interfaz minimalista
-- Barra de progreso superior destacada
-- Opciones con animaciones al hover y selección
-- Botón flotante de ayuda no intrusivo
-- Modal de confirmación de ayuda
+- Barra de progreso superior
+- 20 preguntas con 5 opciones
+- Botón flotante de ayuda
+- Navegación a `/evaluado/finalizado`
 
-### Dashboard del Asesor
+### PantallaFinalizada
 
-- Monitorización en tiempo real
-- Tarjetas modulares por evaluado
-- Indicadores visuales de estado
-- Alertas pulsantes para ayuda
-- Estadísticas agregadas
+- Animación de éxito
+- Mensaje personalizado
+- Información de próximos pasos
+- 3 pasos del proceso
 
 ## 🔮 Próximos Pasos (Backend)
 
-Cuando se implemente el backend, se necesitará:
-
 1. **API Endpoints:**
-   - `POST /api/evaluados` - Registrar nuevo evaluado
-   - `GET /api/evaluados` - Listar evaluados activos
-   - `PUT /api/evaluados/:id/progreso` - Actualizar progreso
-   - `POST /api/evaluados/:id/ayuda` - Solicitar asistencia
-   - `POST /api/respuestas` - Guardar respuestas del test
+
+   ```
+   POST /api/evaluados          - Registrar evaluado
+   GET  /api/evaluados          - Listar evaluados
+   PUT  /api/evaluados/:id      - Actualizar progreso
+   POST /api/respuestas         - Guardar respuestas
+   POST /api/ayuda              - Solicitar asistencia
+   ```
 
 2. **WebSockets / SSE:**
    - Actualización en tiempo real del dashboard
    - Notificaciones de solicitudes de ayuda
-   - Sincronización de progreso
 
 3. **Base de Datos:**
-   - Tabla `evaluados` (datos personales)
-   - Tabla `respuestas` (respuestas del test)
-   - Tabla `sesiones` (control de sesiones activas)
+   - Tabla `evaluados`
+   - Tabla `respuestas`
+   - Tabla `sesiones`
 
-4. **Generación de Links/QR:**
+4. **Autenticación:**
    - Tokens únicos por evaluado
-   - Expiración de enlaces
+   - Links con expiración
    - Tracking de accesos
+
+## 📝 Notas Importantes
+
+- **SessionStorage**: Los datos se pierden al cerrar la pestaña
+- **Validación de rutas**: Todas las rutas protegidas redirigen a `/evaluado/registro`
+- **Navegación**: Usar `navigate()` de React Router, no `window.location`
+- **Datos de ejemplo**: El test tiene 3 preguntas de ejemplo, expandir a 20
 
 ---
 
-**Versión:** 1.0.0  
-**Tecnologías:** React 19 + Vite  
+**Versión:** 2.0.0 (Con Rutas)  
+**Tecnologías:** React 19 + React Router 7 + Vite  
 **Diseño:** Stitch Design Language  
 **Color Principal:** #76C4C5

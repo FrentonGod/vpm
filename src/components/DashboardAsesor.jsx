@@ -1,7 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import ModalGenerarLink from "./ModalGenerarLink";
 import "./DashboardAsesor.css";
 
 const DashboardAsesor = () => {
+  const navigate = useNavigate();
+
+  // Estados para los menús contextuales
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Estado para el modal de generar link
+  const [showModalLink, setShowModalLink] = useState(false);
+
+  // Referencias para detectar clicks fuera de los menús
+  const notificationsRef = useRef(null);
+  const userMenuRef = useRef(null);
+
   // Datos de ejemplo de evaluados en tiempo real
   const [evaluados, setEvaluados] = useState([
     {
@@ -78,13 +93,96 @@ const DashboardAsesor = () => {
     },
   ]);
 
+  // Notificaciones de ejemplo
+  const [notificaciones] = useState([
+    {
+      id: 1,
+      tipo: "ayuda",
+      titulo: "Solicitud de ayuda",
+      mensaje: "Carlos Rodríguez necesita asistencia",
+      tiempo: "Hace 2 min",
+      leida: false,
+      evaluadoId: 2,
+    },
+    {
+      id: 2,
+      tipo: "completado",
+      titulo: "Test completado",
+      mensaje: "María Fernández finalizó el test",
+      tiempo: "Hace 5 min",
+      leida: false,
+      evaluadoId: 3,
+    },
+    {
+      id: 3,
+      tipo: "ayuda",
+      titulo: "Solicitud de ayuda",
+      mensaje: "Roberto Díaz necesita asistencia",
+      tiempo: "Hace 8 min",
+      leida: true,
+      evaluadoId: 6,
+    },
+    {
+      id: 4,
+      tipo: "info",
+      titulo: "Nuevo evaluado",
+      mensaje: "Ana García inició el test",
+      tiempo: "Hace 15 min",
+      leida: true,
+      evaluadoId: 1,
+    },
+  ]);
+
+  // Cerrar menús al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target)
+      ) {
+        setShowNotifications(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleBrindarAsistencia = (evaluadoId) => {
     console.log(`Brindando asistencia al evaluado ${evaluadoId}`);
+    setShowNotifications(false);
     // Aquí iría la lógica para abrir un chat o modal de asistencia
   };
 
   const handleVerDetalle = (evaluadoId) => {
     console.log(`Viendo detalle del evaluado ${evaluadoId}`);
+  };
+
+  const handleLogout = () => {
+    // Eliminar sesión
+    localStorage.removeItem("asesorAuth");
+    // Redirigir al login
+    navigate("/login");
+  };
+
+  const handleMarcarTodasLeidas = () => {
+    console.log("Marcando todas las notificaciones como leídas");
+    setShowNotifications(false);
+  };
+
+  const handleVerPerfil = () => {
+    console.log("Ver perfil");
+    setShowUserMenu(false);
+  };
+
+  const handleConfiguracion = () => {
+    console.log("Ir a configuración");
+    setShowUserMenu(false);
   };
 
   // Estadísticas generales
@@ -109,8 +207,11 @@ const DashboardAsesor = () => {
                 Sistema de Orientación Vocacional
               </p>
             </div>
-            <div className="header-actions">
-              <button className="btn btn-ghost">
+            <div className="header-main-actions">
+              <button
+                className="btn btn-primary btn-generate-link"
+                onClick={() => setShowModalLink(true)}
+              >
                 <svg
                   width="20"
                   height="20"
@@ -119,14 +220,242 @@ const DashboardAsesor = () => {
                   stroke="currentColor"
                   strokeWidth="2"
                 >
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
-                <span className="notification-badge">2</span>
+                Generar Link de Evaluación
               </button>
-              <div className="user-profile">
-                <div className="avatar">AS</div>
-                <span className="font-medium">Asesor</span>
+            </div>
+            <div className="header-actions">
+              {/* Menú de Notificaciones */}
+              <div className="dropdown-wrapper" ref={notificationsRef}>
+                <button
+                  className={`btn btn-ghost ${showNotifications ? "active" : ""}`}
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  aria-label="Notificaciones"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  {notificaciones.filter((n) => !n.leida).length > 0 && (
+                    <span className="notification-badge">
+                      {notificaciones.filter((n) => !n.leida).length}
+                    </span>
+                  )}
+                </button>
+
+                {/* Dropdown de Notificaciones */}
+                {showNotifications && (
+                  <div className="dropdown-menu dropdown-notifications">
+                    <div className="dropdown-header">
+                      <h3>Notificaciones</h3>
+                      <button
+                        className="btn-text-sm"
+                        onClick={handleMarcarTodasLeidas}
+                      >
+                        Marcar todas como leídas
+                      </button>
+                    </div>
+                    <div className="dropdown-content">
+                      {notificaciones.length > 0 ? (
+                        notificaciones.map((notif) => (
+                          <div
+                            key={notif.id}
+                            className={`notification-item ${!notif.leida ? "unread" : ""}`}
+                            onClick={() =>
+                              handleBrindarAsistencia(notif.evaluadoId)
+                            }
+                          >
+                            <div
+                              className={`notification-icon notification-icon-${notif.tipo}`}
+                            >
+                              {notif.tipo === "ayuda" && (
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                >
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                </svg>
+                              )}
+                              {notif.tipo === "completado" && (
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                              {notif.tipo === "info" && (
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <circle cx="12" cy="12" r="10" />
+                                  <line x1="12" y1="16" x2="12" y2="12" />
+                                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                                </svg>
+                              )}
+                            </div>
+                            <div className="notification-content">
+                              <p className="notification-title">
+                                {notif.titulo}
+                              </p>
+                              <p className="notification-message">
+                                {notif.mensaje}
+                              </p>
+                              <p className="notification-time">
+                                {notif.tiempo}
+                              </p>
+                            </div>
+                            {!notif.leida && <div className="unread-dot"></div>}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="empty-state">
+                          <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                          </svg>
+                          <p>No hay notificaciones</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Menú de Usuario */}
+              <div className="dropdown-wrapper" ref={userMenuRef}>
+                <button
+                  className={`user-profile ${showUserMenu ? "active" : ""}`}
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  aria-label="Menú de usuario"
+                >
+                  <div className="avatar">AS</div>
+                  <span className="font-medium">Asesor</span>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className={`chevron ${showUserMenu ? "rotate" : ""}`}
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+
+                {/* Dropdown de Usuario */}
+                {showUserMenu && (
+                  <div className="dropdown-menu dropdown-user">
+                    <div className="dropdown-user-info">
+                      <div className="avatar-large">AS</div>
+                      <div>
+                        <p className="user-name">Asesor Principal</p>
+                        <p className="user-email">asesor@vpm.com</p>
+                      </div>
+                    </div>
+                    <div className="dropdown-divider"></div>
+                    <div className="dropdown-content">
+                      <button
+                        className="dropdown-item"
+                        onClick={handleVerPerfil}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        <span>Ver Perfil</span>
+                      </button>
+                      <button
+                        className="dropdown-item"
+                        onClick={handleConfiguracion}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <circle cx="12" cy="12" r="3" />
+                          <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" />
+                        </svg>
+                        <span>Configuración</span>
+                      </button>
+                      <button className="dropdown-item">
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M12 16v-4" />
+                          <path d="M12 8h.01" />
+                        </svg>
+                        <span>Ayuda y Soporte</span>
+                      </button>
+                    </div>
+                    <div className="dropdown-divider"></div>
+                    <div className="dropdown-content">
+                      <button
+                        className="dropdown-item dropdown-item-danger"
+                        onClick={handleLogout}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                          <polyline points="16 17 21 12 16 7" />
+                          <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span>Cerrar Sesión</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -362,6 +691,12 @@ const DashboardAsesor = () => {
           </div>
         </div>
       </section>
+
+      {/* Modal Generar Link */}
+      <ModalGenerarLink
+        isOpen={showModalLink}
+        onClose={() => setShowModalLink(false)}
+      />
     </div>
   );
 };

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./FormularioRegistro.css";
 
-const FormularioRegistro = ({ onComplete }) => {
+const FormularioRegistro = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nombreCompleto: "",
     telefono: "",
@@ -159,8 +161,10 @@ const FormularioRegistro = ({ onComplete }) => {
     e.preventDefault();
 
     if (validateForm()) {
-      // Pasar los datos al componente padre
-      onComplete(formData);
+      // Guardar los datos en sessionStorage para usarlos en otras rutas
+      sessionStorage.setItem("datosEvaluado", JSON.stringify(formData));
+      // Navegar a la pantalla de bienvenida
+      navigate("/evaluado/bienvenida");
     }
   };
 
