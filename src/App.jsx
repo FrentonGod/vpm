@@ -3,10 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginAsesor from "./components/LoginAsesor";
 import DashboardAsesor from "./components/DashboardAsesor";
 import FormularioRegistro from "./components/FormularioRegistro";
-import PantallaBienvenida from "./components/PantallaBienvenida";
-import VistaEvaluado from "./components/VistaEvaluado";
-import PantallaFinalizada from "./components/PantallaFinalizada";
 import NotFound from "./components/NotFound";
+import TestPersonalidad from "./components/TestPersonalidad";
 import "./App.css";
 
 // Componente para proteger rutas del asesor
@@ -46,9 +44,10 @@ function App() {
           element={<Navigate to="/evaluado/registro" replace />}
         />
         <Route path="/evaluado/registro" element={<FormularioRegistro />} />
-        <Route path="/evaluado/bienvenida" element={<PantallaBienvenida />} />
-        <Route path="/evaluado/test" element={<VistaEvaluado />} />
-        <Route path="/evaluado/finalizado" element={<PantallaFinalizada />} />
+        <Route
+          path="/evaluado/test-personalidad"
+          element={<TestPersonalidad />}
+        />
 
         {/* Ruta 404 - Página no encontrada */}
         <Route path="*" element={<NotFound />} />

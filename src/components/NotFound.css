@@ -3,7 +3,7 @@
    ======================================== */
 
 .not-found-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -11,7 +11,7 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #f5f7fa 0%, #e0f7f7 50%, #f5f7fa 100%);
-  padding: var(--space-2xl) var(--space-lg);
+  padding: var(--space-md);
 }
 
 /* --- FONDO ANIMADO --- */
@@ -121,7 +121,7 @@
 
 /* --- ILUSTRACIÓN --- */
 .not-found-illustration {
-  margin-bottom: var(--space-3xl);
+  margin-bottom: var(--space-lg);
   position: relative;
 }
 
@@ -129,12 +129,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xl);
-  margin-bottom: var(--space-2xl);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
 }
 
 .digit {
-  font-size: 10rem;
+  font-size: 6rem;
   font-weight: 900;
   color: var(--accent-primary);
   text-shadow: 0 4px 20px rgba(118, 196, 197, 0.3);
@@ -189,14 +189,14 @@
 /* --- ICONOS DE CARRERAS --- */
 .career-icons {
   position: relative;
-  height: 100px;
-  margin-top: var(--space-2xl);
+  height: 60px;
+  margin-top: var(--space-md);
 }
 
 .career-icon {
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 45px;
+  height: 45px;
   background: white;
   border-radius: var(--radius-lg);
   display: flex;
@@ -207,6 +207,11 @@
   transition: all var(--transition-base);
   cursor: pointer;
   animation: floatIcon 4s ease-in-out infinite;
+}
+
+.career-icon svg {
+  width: 28px;
+  height: 28px;
 }
 
 .career-icon:hover {
@@ -269,31 +274,31 @@
 .not-found-text {
   background: white;
   border-radius: var(--radius-2xl);
-  padding: var(--space-3xl);
+  padding: var(--space-xl) var(--space-2xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--neutral-200);
 }
 
 .not-found-text h1 {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: var(--neutral-900);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-sm);
   line-height: 1.2;
 }
 
 .subtitle {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: var(--neutral-700);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
   font-weight: 500;
 }
 
 .description {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: var(--neutral-600);
-  margin-bottom: var(--space-2xl);
-  line-height: 1.6;
+  margin-bottom: var(--space-lg);
+  line-height: 1.5;
 }
 
 /* --- ACCIONES --- */
@@ -301,21 +306,21 @@
   display: flex;
   gap: var(--space-md);
   justify-content: center;
-  margin-bottom: var(--space-2xl);
+  margin-bottom: var(--space-lg);
 }
 
 .not-found-actions .btn {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: 1rem 2rem;
-  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
   font-weight: 600;
 }
 
 /* --- ENLACES ÚTILES --- */
 .helpful-links {
-  padding-top: var(--space-2xl);
+  padding-top: var(--space-lg);
   border-top: 1px solid var(--neutral-200);
 }
 
@@ -360,9 +365,11 @@
 
 /* --- FOOTER --- */
 .not-found-footer {
-  position: relative;
+  position: absolute;
+  bottom: var(--space-md);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1;
-  margin-top: var(--space-2xl);
   text-align: center;
 }
 
@@ -370,8 +377,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  font-size: 0.875rem;
+  gap: var(--space-xs);
+  font-size: 0.8125rem;
   color: var(--neutral-600);
   margin: 0;
 }
@@ -383,62 +390,8 @@
 
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
-  .digit {
-    font-size: 6rem;
-  }
-
-  .compass {
-    width: 150px;
-    height: 150px;
-  }
-
-  .error-code {
-    gap: var(--space-md);
-  }
-
-  .career-icons {
-    height: 80px;
-  }
-
-  .career-icon {
-    width: 50px;
-    height: 50px;
-  }
-
-  .career-icon svg {
-    width: 30px;
-    height: 30px;
-  }
-
-  .not-found-text {
-    padding: var(--space-2xl);
-  }
-
-  .not-found-text h1 {
-    font-size: 2rem;
-  }
-
-  .subtitle {
-    font-size: 1.125rem;
-  }
-
-  .not-found-actions {
-    flex-direction: column;
-  }
-
-  .not-found-actions .btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .links-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
   .not-found-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: var(--space-sm);
   }
 
   .digit {
@@ -452,35 +405,180 @@
 
   .error-code {
     gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
+
+  .career-icons {
+    height: 50px;
+    margin-top: var(--space-sm);
+  }
+
+  .career-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .career-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .not-found-illustration {
+    margin-bottom: var(--space-md);
+  }
+
+  .not-found-text {
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .not-found-text h1 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .subtitle {
+    font-size: 0.9375rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .description {
+    font-size: 0.8125rem;
+    margin-bottom: var(--space-md);
+  }
+
+  .not-found-actions {
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .not-found-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .helpful-links {
+    padding-top: var(--space-md);
+  }
+
+  .links-title {
+    font-size: 0.8125rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .links-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .helpful-link {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.8125rem;
+  }
+
+  .not-found-footer {
+    bottom: var(--space-sm);
+  }
+
+  .not-found-footer p {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .not-found-container {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .digit {
+    font-size: 3rem;
+  }
+
+  .compass {
+    width: 90px;
+    height: 90px;
+  }
+
+  .error-code {
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
   }
 
   .career-icons {
     display: none;
   }
 
+  .not-found-illustration {
+    margin-bottom: var(--space-sm);
+  }
+
   .not-found-text {
-    padding: var(--space-xl);
+    padding: var(--space-sm) var(--space-md);
   }
 
   .not-found-text h1 {
-    font-size: 1.75rem;
+    font-size: 1.25rem;
+    margin-bottom: 0;
   }
 
   .subtitle {
-    font-size: 1rem;
+    font-size: 0.875rem;
+    margin-bottom: var(--space-xs);
   }
 
   .description {
-    font-size: 0.9375rem;
+    font-size: 0.75rem;
+    margin-bottom: var(--space-sm);
+    line-height: 1.4;
+  }
+
+  .not-found-actions {
+    gap: var(--space-xs);
+    margin-bottom: var(--space-sm);
   }
 
   .not-found-actions .btn {
-    padding: 0.875rem 1.5rem;
-    font-size: 0.9375rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .not-found-actions .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .helpful-links {
+    padding-top: var(--space-sm);
+  }
+
+  .links-title {
+    font-size: 0.75rem;
+    margin-bottom: var(--space-xs);
   }
 
   .helpful-link {
-    font-size: 0.8125rem;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.75rem;
+  }
+
+  .helpful-link svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .not-found-footer {
+    bottom: var(--space-xs);
+  }
+
+  .not-found-footer p {
+    font-size: 0.6875rem;
+    gap: 2px;
+  }
+
+  .not-found-footer svg {
+    width: 12px;
+    height: 12px;
   }
 }
 

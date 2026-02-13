@@ -163,8 +163,8 @@ const FormularioRegistro = () => {
     if (validateForm()) {
       // Guardar los datos en sessionStorage para usarlos en otras rutas
       sessionStorage.setItem("datosEvaluado", JSON.stringify(formData));
-      // Navegar a la pantalla de bienvenida
-      navigate("/evaluado/bienvenida");
+      // Navegar directamente al test de personalidad
+      navigate("/evaluado/test-personalidad");
     }
   };
 
