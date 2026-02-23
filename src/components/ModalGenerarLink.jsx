@@ -24,7 +24,18 @@ const ModalGenerarLink = ({ isOpen, onClose }) => {
       setCopiado(false);
       setShowQR(false);
       setNombreEvaluado("");
+
+      // Bloquear scroll del body
+      document.body.style.overflow = "hidden";
+    } else {
+      // Restaurar scroll del body
+      document.body.style.overflow = "unset";
     }
+
+    // Cleanup: restaurar scroll al desmontar
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen]);
 
   const generateUniqueId = () => {

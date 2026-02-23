@@ -3,6 +3,20 @@ import { useNavigate } from "react-router-dom";
 import vpmLogo from "../assets/vpm-logo.svg";
 import "./LoginAsesor.css";
 
+// Datos estáticos hoisted al nivel módulo (rendering-hoist-jsx)
+const POPULAR_DOMAINS = [
+  "gmail.com",
+  "hotmail.com",
+  "outlook.com",
+  "yahoo.com",
+  "icloud.com",
+  "live.com",
+  "protonmail.com",
+];
+
+// RegExp hoisted al nivel módulo (js-hoist-regexp)
+const EMAIL_REGEX = /\S+@\S+\.\S+/;
+
 const LoginAsesor = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -12,6 +26,8 @@ const LoginAsesor = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDomainSuggestions, setShowDomainSuggestions] = useState(false);
+  const [domainSuggestions, setDomainSuggestions] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,6 +35,33 @@ const LoginAsesor = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Lógica de autocompletado para email
+    if (name === "email") {
+      const atIndex = value.indexOf("@");
+
+      if (atIndex > 0 && atIndex === value.length - 1) {
+        // Usuario acaba de escribir @
+        setDomainSuggestions(POPULAR_DOMAINS);
+        setShowDomainSuggestions(true);
+      } else if (atIndex > 0) {
+        // Usuario está escribiendo después del @
+        const domain = value.substring(atIndex + 1);
+        if (domain.length > 0) {
+          const filtered = POPULAR_DOMAINS.filter((d) =>
+            d.toLowerCase().startsWith(domain.toLowerCase()),
+          );
+          setDomainSuggestions(filtered);
+          setShowDomainSuggestions(filtered.length > 0);
+        } else {
+          setDomainSuggestions(POPULAR_DOMAINS);
+          setShowDomainSuggestions(true);
+        }
+      } else {
+        setShowDomainSuggestions(false);
+      }
+    }
+
     // Limpiar error del campo al escribir
     if (errors[name]) {
       setErrors((prev) => ({
@@ -28,13 +71,23 @@ const LoginAsesor = () => {
     }
   };
 
+  const handleDomainSelect = (domain) => {
+    const atIndex = formData.email.indexOf("@");
+    const username = formData.email.substring(0, atIndex);
+    setFormData((prev) => ({
+      ...prev,
+      email: `${username}@${domain}`,
+    }));
+    setShowDomainSuggestions(false);
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
     // Validar email
     if (!formData.email) {
       newErrors.email = "El correo electrónico es requerido";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!EMAIL_REGEX.test(formData.email)) {
       newErrors.email = "Ingresa un correo electrónico válido";
     }
 
@@ -96,7 +149,7 @@ const LoginAsesor = () => {
         {/* Formulario */}
         <form className="login-form" onSubmit={handleSubmit}>
           {/* Campo Email */}
-          <div className="form-group">
+          <div className="form-group email-group">
             <label htmlFor="email" className="form-label">
               <svg
                 width="20"
@@ -111,16 +164,46 @@ const LoginAsesor = () => {
               </svg>
               Correo Electrónico
             </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className={`form-input ${errors.email ? "input-error" : ""}`}
-              placeholder="asesor@ejemplo.com"
-              value={formData.email}
-              onChange={handleChange}
-              autoComplete="email"
-            />
+            <div className="email-input-wrapper">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className={`form-input ${errors.email ? "input-error" : ""}`}
+                placeholder="asesor@ejemplo.com"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={() =>
+                  setTimeout(() => setShowDomainSuggestions(false), 200)
+                }
+                autoComplete="off"
+              />
+              {showDomainSuggestions && domainSuggestions.length > 0 && (
+                <div className="domain-suggestions">
+                  {domainSuggestions.map((domain) => (
+                    <button
+                      key={domain}
+                      type="button"
+                      className="domain-suggestion-item"
+                      onClick={() => handleDomainSelect(domain)}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                      </svg>
+                      {formData.email.split("@")[0]}@{domain}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {errors.email && (
               <span className="error-message">
                 <svg

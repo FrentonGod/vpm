@@ -1,6 +1,58 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FormularioRegistro.css";
+
+// Datos estáticos hoisted al nivel módulo (rendering-hoist-jsx)
+const BACHILLERATOS = [
+  "CBTis",
+  "CETis",
+  "CONALEP",
+  "Colegio de Bachilleres",
+  "Preparatoria Estatal",
+  "Preparatoria Federal",
+  "Telebachillerato",
+  "CECYTE",
+  "Otro",
+];
+
+const COMUNIDADES = [
+  "Mérida",
+  "Progreso",
+  "Valladolid",
+  "Tizimín",
+  "Kanasín",
+  "Umán",
+  "Motul",
+  "Tekax",
+  "Otra",
+];
+
+const CURSOS_MQERK = [
+  "Programación Web",
+  "Diseño Gráfico",
+  "Marketing Digital",
+  "Inglés",
+  "Robótica",
+  "Desarrollo de Apps",
+  "Edición de Video",
+  "Fotografía",
+];
+
+// RegExp hoisted al nivel módulo (js-hoist-regexp)
+const PHONE_REGEX = /^\d{10}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Función helper pura fuera del componente
+const calcularEdadDesde = (fechaNacimiento) => {
+  const hoy = new Date();
+  const fechaNac = new Date(fechaNacimiento);
+  let edad = hoy.getFullYear() - fechaNac.getFullYear();
+  const mes = hoy.getMonth() - fechaNac.getMonth();
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+    edad--;
+  }
+  return edad;
+};
 
 const FormularioRegistro = () => {
   const navigate = useNavigate();
@@ -9,7 +61,6 @@ const FormularioRegistro = () => {
     telefono: "",
     email: "",
     fechaNacimiento: "",
-    edad: null,
     concluidoBachillerato: null,
     bachillerato: "",
     semestre: "",
@@ -19,59 +70,12 @@ const FormularioRegistro = () => {
     aceptaTerminos: false,
   });
 
+  // Derivar edad durante el render (rerender-derived-state-no-effect)
+  const edad = formData.fechaNacimiento
+    ? calcularEdadDesde(formData.fechaNacimiento)
+    : null;
+
   const [errors, setErrors] = useState({});
-
-  // Datos de ejemplo para los dropdowns
-  const bachilleratos = [
-    "CBTis",
-    "CETis",
-    "CONALEP",
-    "Colegio de Bachilleres",
-    "Preparatoria Estatal",
-    "Preparatoria Federal",
-    "Telebachillerato",
-    "CECYTE",
-    "Otro",
-  ];
-
-  const comunidades = [
-    "Mérida",
-    "Progreso",
-    "Valladolid",
-    "Tizimín",
-    "Kanasín",
-    "Umán",
-    "Motul",
-    "Tekax",
-    "Otra",
-  ];
-
-  const cursosMqerk = [
-    "Programación Web",
-    "Diseño Gráfico",
-    "Marketing Digital",
-    "Inglés",
-    "Robótica",
-    "Desarrollo de Apps",
-    "Edición de Video",
-    "Fotografía",
-  ];
-
-  // Calcular edad automáticamente
-  useEffect(() => {
-    if (formData.fechaNacimiento) {
-      const hoy = new Date();
-      const fechaNac = new Date(formData.fechaNacimiento);
-      let edad = hoy.getFullYear() - fechaNac.getFullYear();
-      const mes = hoy.getMonth() - fechaNac.getMonth();
-
-      if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
-        edad--;
-      }
-
-      setFormData((prev) => ({ ...prev, edad }));
-    }
-  }, [formData.fechaNacimiento]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -111,13 +115,13 @@ const FormularioRegistro = () => {
 
     if (!formData.telefono.trim()) {
       newErrors.telefono = "El teléfono es requerido";
-    } else if (!/^\d{10}$/.test(formData.telefono.replace(/\s/g, ""))) {
+    } else if (!PHONE_REGEX.test(formData.telefono.replace(/\s/g, ""))) {
       newErrors.telefono = "Ingresa un teléfono válido de 10 dígitos";
     }
 
     if (!formData.email.trim()) {
       newErrors.email = "El correo electrónico es requerido";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!EMAIL_REGEX.test(formData.email)) {
       newErrors.email = "Ingresa un correo electrónico válido";
     }
 
@@ -278,7 +282,7 @@ const FormularioRegistro = () => {
               <input
                 type="text"
                 className="input"
-                value={formData.edad !== null ? `${formData.edad} años` : ""}
+                value={edad !== null ? `${edad} años` : ""}
                 disabled
               />
             </div>
@@ -342,7 +346,7 @@ const FormularioRegistro = () => {
                   onChange={handleChange}
                 >
                   <option value="">Selecciona una opción</option>
-                  {bachilleratos.map((bach) => (
+                  {BACHILLERATOS.map((bach) => (
                     <option key={bach} value={bach}>
                       {bach}
                     </option>
@@ -392,7 +396,7 @@ const FormularioRegistro = () => {
               onChange={handleChange}
             >
               <option value="">Selecciona tu comunidad</option>
-              {comunidades.map((com) => (
+              {COMUNIDADES.map((com) => (
                 <option key={com} value={com}>
                   {com}
                 </option>
@@ -403,10 +407,10 @@ const FormularioRegistro = () => {
             )}
           </div>
 
-          {/* ¿Está tomando un curso en Mqerk Academy? */}
+          {/* ¿Está tomando un curso en MQerK Academy? */}
           <div className="form-group">
             <label className="form-label">
-              ¿Está tomando un curso en Mqerk Academy?{" "}
+              ¿Está tomando un curso en MQerK Academy?{" "}
               <span className="required">*</span>
             </label>
             <div className="radio-group">
@@ -454,7 +458,7 @@ const FormularioRegistro = () => {
                 onChange={handleChange}
               >
                 <option value="">Selecciona el curso</option>
-                {cursosMqerk.map((curso) => (
+                {CURSOS_MQERK.map((curso) => (
                   <option key={curso} value={curso}>
                     {curso}
                   </option>

@@ -1,261 +1,181 @@
-# Sistema de Orientación Vocacional - Con Rutas
+# VPM — Sistema de Orientación Vocacional
 
-## 📋 Descripción del Sistema
+> **Vocational Personality Measurement** · Desarrollado para MQerK Academy
 
-Sistema web de orientación vocacional que permite a asesores monitorear en tiempo real el progreso de múltiples evaluados mientras estos completan un test vocacional personalizado.
+---
+
+## 📋 Descripción
+
+VPM es una aplicación web de orientación vocacional con dos tipos de usuario:
+
+| Usuario      | Acceso                                            |
+| ------------ | ------------------------------------------------- |
+| **Asesor**   | Login → Dashboard → Genera links para evaluados   |
+| **Evaluado** | Accede por link → Registro → 3 Tests secuenciales |
+
+---
 
 ## 🔄 Rutas del Sistema
 
 ### Rutas del Asesor
 
-| Ruta      | Componente        | Descripción                        |
-| --------- | ----------------- | ---------------------------------- |
-| `/`       | Redirect          | Redirige a `/asesor`               |
-| `/asesor` | `DashboardAsesor` | Panel de monitorización del asesor |
+| Ruta      | Componente        | Acceso                       |
+| --------- | ----------------- | ---------------------------- |
+| `/login`  | `LoginAsesor`     | Pública                      |
+| `/asesor` | `DashboardAsesor` | Protegida (`ProtectedRoute`) |
 
 ### Rutas del Evaluado
 
-| Ruta                   | Componente           | Descripción                     |
-| ---------------------- | -------------------- | ------------------------------- |
-| `/evaluado`            | Redirect             | Redirige a `/evaluado/registro` |
-| `/evaluado/registro`   | `FormularioRegistro` | Formulario de datos personales  |
-| `/evaluado/bienvenida` | `PantallaBienvenida` | Instrucciones del test          |
-| `/evaluado/test`       | `VistaEvaluado`      | Realización del test            |
-| `/evaluado/finalizado` | `PantallaFinalizada` | Pantalla de agradecimiento      |
+| Ruta                          | Componente           | Descripción                                |
+| ----------------------------- | -------------------- | ------------------------------------------ |
+| `/evaluado`                   | Redirect             | Redirige a `/evaluado/registro`            |
+| `/evaluado/registro`          | `FormularioRegistro` | Datos personales del evaluado              |
+| `/evaluado/test-personalidad` | `TestPersonalidad`   | Test de Personalidad — 36 preguntas        |
+| `/evaluado/test-intereses`    | `TestIntereses`      | Test de Perfil de Intereses — 60 preguntas |
+| `/evaluado/test-aptitudes`    | `TestAptitudes`      | Test de Aptitudes — 60 preguntas           |
+
+---
 
 ## 🚀 Flujo del Evaluado
 
 ```
 1. /evaluado/registro
-   ↓ (completa formulario)
-   ↓ (datos guardados en sessionStorage)
+   ↓ Formulario de datos personales
 
-2. /evaluado/bienvenida
-   ↓ (lee instrucciones)
-   ↓ (click en "Comenzar Test")
+2. /evaluado/test-personalidad
+   ↓ 36 preguntas · 6 secciones × 6 preguntas
+   ↓ Escala 1–5 · Resultados guardados en localStorage
 
-3. /evaluado/test
-   ↓ (responde 20 preguntas)
-   ↓ (click en "Finalizar Test")
+3. /evaluado/test-intereses
+   ↓ 60 preguntas (Parte 1: actividades · Parte 2: profesiones)
+   ↓ Escala 1–4 · Resultados guardados en localStorage
 
-4. /evaluado/finalizado
-   ✓ (pantalla de agradecimiento)
+4. /evaluado/test-aptitudes
+   ↓ 60 preguntas · 8 áreas de aptitud
+   ↓ Escala 0–4 · Resultados guardados en localStorage
+   ✓ Pantalla de agradecimiento con redes de MQerK Academy
 ```
 
-## 💾 Gestión de Datos
-
-### SessionStorage
-
-Los datos del evaluado se guardan en `sessionStorage` para persistir entre rutas:
-
-```javascript
-// Guardar datos (en FormularioRegistro)
-sessionStorage.setItem("datosEvaluado", JSON.stringify(formData));
-
-// Leer datos (en otras rutas)
-const datosGuardados = sessionStorage.getItem("datosEvaluado");
-const datos = JSON.parse(datosGuardados);
-```
-
-### Protección de Rutas
-
-Todas las rutas del evaluado (excepto `/evaluado/registro`) verifican que existan datos en sessionStorage:
-
-```javascript
-useEffect(() => {
-  const datosGuardados = sessionStorage.getItem("datosEvaluado");
-  if (!datosGuardados) {
-    navigate("/evaluado/registro"); // Redirige si no hay datos
-  }
-}, [navigate]);
-```
+---
 
 ## 📁 Estructura de Archivos
 
 ```
 src/
-├── App.jsx                           # Router principal con todas las rutas
-├── App.css                           # Estilos mínimos de la app
-├── main.jsx                          # Punto de entrada
-├── index.css                         # Sistema de diseño Stitch
+├── App.jsx                         # Router principal
+├── App.css
+├── main.jsx                        # Punto de entrada
+├── index.css                       # Design system (variables CSS)
 └── components/
-    ├── DashboardAsesor.jsx           # Dashboard del asesor
+    ├── LoginAsesor.jsx             # Login del asesor con autocompletado de email
+    ├── LoginAsesor.css
+    ├── DashboardAsesor.jsx         # Panel del asesor
     ├── DashboardAsesor.css
-    ├── FormularioRegistro.jsx        # Formulario inicial
+    ├── ModalGenerarLink.jsx        # Modal para generar links de evaluación
+    ├── ModalGenerarLink.css
+    ├── FormularioRegistro.jsx      # Registro de datos del evaluado
     ├── FormularioRegistro.css
-    ├── PantallaBienvenida.jsx        # Pantalla de bienvenida
-    ├── PantallaBienvenida.css
-    ├── VistaEvaluado.jsx             # Interfaz del test
-    ├── VistaEvaluado.css
-    ├── PantallaFinalizada.jsx        # Pantalla de agradecimiento
-    └── PantallaFinalizada.css
+    ├── TestPersonalidad.jsx        # Test de Personalidad (36 preg.)
+    ├── TestPersonalidad.css
+    ├── TestIntereses.jsx           # Test de Perfil de Intereses (60 preg.)
+    ├── TestIntereses.css
+    ├── TestAptitudes.jsx           # Test de Aptitudes (60 preg.)
+    ├── TestAptitudes.css
+    └── NotFound.jsx                # Página 404
 ```
-
-## 🛠️ Tecnologías
-
-- **React 19** - Framework principal
-- **React Router DOM 7** - Manejo de rutas
-- **Vite** - Build tool y dev server
-- **CSS Modules** - Estilos por componente
-
-## 🎨 Diseño
-
-- **Sistema de diseño**: Stitch Design Language
-- **Color principal**: #76C4C5 (Turquesa)
-- **Tipografía**: Inter (Google Fonts)
-- **Responsive**: Desktop, Tablet, Móvil
-
-## 🚀 Uso del Sistema
-
-### Instalación
-
-```bash
-npm install
-```
-
-### Desarrollo
-
-```bash
-npm run dev
-```
-
-El servidor estará disponible en `http://localhost:5173`
-
-### Navegación
-
-#### Para Asesores:
-
-- Ir a: `http://localhost:5173/asesor`
-- Ver dashboard con evaluados activos
-
-#### Para Evaluados:
-
-- Ir a: `http://localhost:5173/evaluado`
-- Completar el flujo completo:
-  1. Registro
-  2. Bienvenida
-  3. Test
-  4. Finalización
-
-## 📊 Datos del Formulario
-
-```javascript
-{
-  nombreCompleto: string,
-  telefono: string,           // 10 dígitos
-  email: string,
-  fechaNacimiento: date,
-  edad: number,               // Calculado automáticamente
-  concluidoBachillerato: 'si' | 'no',
-  bachillerato: string,       // Solo si no ha concluido
-  semestre: string,           // Solo si no ha concluido
-  comunidad: string,
-  cursandoMqerk: 'si' | 'no',
-  cursoMqerk: string,         // Solo si está cursando
-  aceptaTerminos: boolean
-}
-```
-
-## 🔐 Validaciones
-
-### Formulario de Registro
-
-- ✅ Nombre completo requerido
-- ✅ Teléfono de 10 dígitos
-- ✅ Email con formato válido
-- ✅ Fecha de nacimiento requerida
-- ✅ Campos condicionales según respuestas
-- ✅ Términos y condiciones obligatorios
-- ✅ Botón deshabilitado sin aceptar términos
-
-### Navegación
-
-- ✅ Protección de rutas con sessionStorage
-- ✅ Redirección automática si faltan datos
-- ✅ Validación de respuestas antes de avanzar
-
-## 📱 Responsive Design
-
-### Breakpoints:
-
-- **Desktop**: > 768px
-- **Tablet**: 640px - 768px
-- **Mobile**: < 640px
-
-### Optimizaciones:
-
-- ✅ Todas las opciones visibles sin scroll
-- ✅ Tamaños de fuente adaptativos
-- ✅ Padding y spacing optimizados
-- ✅ Botones táctiles adecuados
-
-## 🎯 Características Destacadas
-
-### FormularioRegistro
-
-- Campos condicionales dinámicos
-- Cálculo automático de edad
-- Validación en tiempo real
-- Navegación a `/evaluado/bienvenida`
-
-### PantallaBienvenida
-
-- Saludo personalizado con primer nombre
-- Instrucciones claras del test
-- Ilustración animada
-- Navegación a `/evaluado/test`
-
-### VistaEvaluado
-
-- Interfaz minimalista
-- Barra de progreso superior
-- 20 preguntas con 5 opciones
-- Botón flotante de ayuda
-- Navegación a `/evaluado/finalizado`
-
-### PantallaFinalizada
-
-- Animación de éxito
-- Mensaje personalizado
-- Información de próximos pasos
-- 3 pasos del proceso
-
-## 🔮 Próximos Pasos (Backend)
-
-1. **API Endpoints:**
-
-   ```
-   POST /api/evaluados          - Registrar evaluado
-   GET  /api/evaluados          - Listar evaluados
-   PUT  /api/evaluados/:id      - Actualizar progreso
-   POST /api/respuestas         - Guardar respuestas
-   POST /api/ayuda              - Solicitar asistencia
-   ```
-
-2. **WebSockets / SSE:**
-   - Actualización en tiempo real del dashboard
-   - Notificaciones de solicitudes de ayuda
-
-3. **Base de Datos:**
-   - Tabla `evaluados`
-   - Tabla `respuestas`
-   - Tabla `sesiones`
-
-4. **Autenticación:**
-   - Tokens únicos por evaluado
-   - Links con expiración
-   - Tracking de accesos
-
-## 📝 Notas Importantes
-
-- **SessionStorage**: Los datos se pierden al cerrar la pestaña
-- **Validación de rutas**: Todas las rutas protegidas redirigen a `/evaluado/registro`
-- **Navegación**: Usar `navigate()` de React Router, no `window.location`
-- **Datos de ejemplo**: El test tiene 3 preguntas de ejemplo, expandir a 20
 
 ---
 
-**Versión:** 2.0.0 (Con Rutas)  
-**Tecnologías:** React 19 + React Router 7 + Vite  
-**Diseño:** Stitch Design Language  
-**Color Principal:** #76C4C5
+## 🎨 Sistema de Diseño
+
+- **Tipografía**: Inter (Google Fonts)
+- **Estilos**: Vanilla CSS con variables (sin Tailwind, sin UI libs)
+- **Breakpoints**: `>768px` Desktop · `≤768px` Tablet · `≤480px` Móvil
+
+### Colores por test
+
+| Test                        | Color               |
+| --------------------------- | ------------------- |
+| Test de Personalidad        | `#76c4c5` (teal)    |
+| Test de Intereses           | verde esmeralda     |
+| Test de Aptitudes           | `#6366f1` (índigo)  |
+| Pantalla final de Aptitudes | `#8756e5` (púrpura) |
+
+---
+
+## 🧠 Tests — Resumen
+
+### Test de Personalidad
+
+- **36 preguntas** en 6 secciones (Artístico, Realista, Social, Investigativo, Emprendedor, Convencional)
+- **Escala 1–5**: Sin coincidencia → El más coincidente
+- Guarda `resultadosPersonalidad` en `localStorage`
+
+### Test de Perfil de Intereses
+
+- **60 sentencias** divididas en 2 partes
+- Parte 1 (50): "¿Qué tanto te gustaría...?"
+- Parte 2 (10): "¿Qué tanto te gustaría trabajar como...?"
+- **Escala 1–4**: Me desagrada → Me gusta mucho
+- Guarda `resultadosIntereses` en `localStorage`
+
+### Test de Aptitudes
+
+- **60 preguntas** en 8 áreas: Verbal, Lógico-Matemática, Espacial, Manual, Social, Liderazgo, Científica, Tecnológica
+- **Escala 0–4**: Incompetente → Muy competente
+- Guarda `resultadosAptitudes` en `localStorage`
+- Pantalla de agradecimiento con links a redes de MQerK Academy
+
+---
+
+## 💾 Gestión de Datos
+
+```
+sessionStorage  →  "datosEvaluado"         (FormularioRegistro)
+localStorage    →  "resultadosPersonalidad" (TestPersonalidad)
+localStorage    →  "resultadosIntereses"    (TestIntereses)
+localStorage    →  "resultadosAptitudes"    (TestAptitudes)
+localStorage    →  "asesorAuth"             (LoginAsesor)
+```
+
+---
+
+## 🛠️ Tecnologías
+
+- **React 19** + **Vite** — Framework y build tool
+- **React Router DOM 7** — Enrutamiento
+- **Vanilla CSS** — Estilos (sin Tailwind ni librerías UI)
+- **localStorage / sessionStorage** — Persistencia temporal
+
+---
+
+## 🚀 Desarrollo
+
+```bash
+npm install
+npm run dev
+# http://localhost:5173
+```
+
+---
+
+## 🔐 Autenticación
+
+- El asesor inicia sesión con email/contraseña
+- La sesión se guarda en `localStorage` como `asesorAuth`
+- Las rutas del asesor están protegidas con `<ProtectedRoute>`
+- **Pendiente**: Integrar con Supabase Auth
+
+---
+
+## 🔮 Próximos Pasos
+
+- [ ] **Pantalla de Resultados** — Mostrar las 3 personalidades al evaluado tras completar los tests
+- [ ] **Integración Supabase Auth** — Autenticación real del asesor
+- [ ] **Integración Supabase DB** — Guardar evaluados y resultados en base de datos
+- [ ] **Historial de Evaluados** — Vista en dashboard con resultados por evaluado
+
+---
+
+**Versión:** 3.0.0
+**Academia:** MQerK Academy — _Vivir para pensar mejor_

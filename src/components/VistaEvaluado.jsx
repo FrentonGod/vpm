@@ -2,6 +2,49 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./VistaEvaluado.css";
 
+// Datos estáticos hoisted al nivel módulo (rendering-hoist-jsx)
+const TEST_DATA = {
+  titulo: "Test de Orientación Vocacional",
+  totalPreguntas: 20,
+  preguntas: [
+    {
+      id: 1,
+      texto: "¿Te gusta trabajar con números y realizar cálculos complejos?",
+      opciones: [
+        { id: "a", texto: "Totalmente en desacuerdo", valor: 1 },
+        { id: "b", texto: "En desacuerdo", valor: 2 },
+        { id: "c", texto: "Neutral", valor: 3 },
+        { id: "d", texto: "De acuerdo", valor: 4 },
+        { id: "e", texto: "Totalmente de acuerdo", valor: 5 },
+      ],
+    },
+    {
+      id: 2,
+      texto: "¿Disfrutas ayudando a otras personas a resolver sus problemas?",
+      opciones: [
+        { id: "a", texto: "Totalmente en desacuerdo", valor: 1 },
+        { id: "b", texto: "En desacuerdo", valor: 2 },
+        { id: "c", texto: "Neutral", valor: 3 },
+        { id: "d", texto: "De acuerdo", valor: 4 },
+        { id: "e", texto: "Totalmente de acuerdo", valor: 5 },
+      ],
+    },
+    {
+      id: 3,
+      texto:
+        "¿Te interesa el diseño y la creación de cosas visualmente atractivas?",
+      opciones: [
+        { id: "a", texto: "Totalmente en desacuerdo", valor: 1 },
+        { id: "b", texto: "En desacuerdo", valor: 2 },
+        { id: "c", texto: "Neutral", valor: 3 },
+        { id: "d", texto: "De acuerdo", valor: 4 },
+        { id: "e", texto: "Totalmente de acuerdo", valor: 5 },
+      ],
+    },
+    // Más preguntas...
+  ],
+};
+
 const VistaEvaluado = () => {
   const navigate = useNavigate();
   const [preguntaActual, setPreguntaActual] = useState(0);
@@ -20,61 +63,32 @@ const VistaEvaluado = () => {
     }
   }, [navigate]);
 
-  // Datos de ejemplo del test
-  const test = {
-    titulo: "Test de Orientación Vocacional",
-    totalPreguntas: 20,
-    preguntas: [
-      {
-        id: 1,
-        texto: "¿Te gusta trabajar con números y realizar cálculos complejos?",
-        opciones: [
-          { id: "a", texto: "Totalmente en desacuerdo", valor: 1 },
-          { id: "b", texto: "En desacuerdo", valor: 2 },
-          { id: "c", texto: "Neutral", valor: 3 },
-          { id: "d", texto: "De acuerdo", valor: 4 },
-          { id: "e", texto: "Totalmente de acuerdo", valor: 5 },
-        ],
-      },
-      {
-        id: 2,
-        texto: "¿Disfrutas ayudando a otras personas a resolver sus problemas?",
-        opciones: [
-          { id: "a", texto: "Totalmente en desacuerdo", valor: 1 },
-          { id: "b", texto: "En desacuerdo", valor: 2 },
-          { id: "c", texto: "Neutral", valor: 3 },
-          { id: "d", texto: "De acuerdo", valor: 4 },
-          { id: "e", texto: "Totalmente de acuerdo", valor: 5 },
-        ],
-      },
-      {
-        id: 3,
-        texto:
-          "¿Te interesa el diseño y la creación de cosas visualmente atractivas?",
-        opciones: [
-          { id: "a", texto: "Totalmente en desacuerdo", valor: 1 },
-          { id: "b", texto: "En desacuerdo", valor: 2 },
-          { id: "c", texto: "Neutral", valor: 3 },
-          { id: "d", texto: "De acuerdo", valor: 4 },
-          { id: "e", texto: "Totalmente de acuerdo", valor: 5 },
-        ],
-      },
-      // Más preguntas...
-    ],
-  };
+  // Bloquear scroll cuando el modal de ayuda está abierto
+  useEffect(() => {
+    if (mostrarAyuda) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
 
-  const pregunta = test.preguntas[preguntaActual];
-  const progreso = ((preguntaActual + 1) / test.totalPreguntas) * 100;
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mostrarAyuda]);
+
+  const pregunta = TEST_DATA.preguntas[preguntaActual];
+  const progreso = ((preguntaActual + 1) / TEST_DATA.totalPreguntas) * 100;
 
   const handleSeleccionarRespuesta = (opcionId) => {
-    setRespuestas({
-      ...respuestas,
+    // Forma funcional para evitar stale closures (rerender-functional-setstate)
+    setRespuestas((prev) => ({
+      ...prev,
       [pregunta.id]: opcionId,
-    });
+    }));
   };
 
   const handleSiguiente = () => {
-    if (preguntaActual < test.preguntas.length - 1) {
+    if (preguntaActual < TEST_DATA.preguntas.length - 1) {
       setPreguntaActual(preguntaActual + 1);
     }
   };
@@ -98,7 +112,7 @@ const VistaEvaluado = () => {
     // Aquí iría la lógica para notificar al asesor
   };
 
-  const respuestaSeleccionada = respuestas[pregunta.id];
+  const respuestaSeleccionada = respuestas[pregunta?.id];
   const puedeAvanzar = respuestaSeleccionada !== undefined;
 
   return (
@@ -118,7 +132,7 @@ const VistaEvaluado = () => {
           <div className="test-info">
             <h1 className="test-titulo">{test.titulo}</h1>
             <p className="test-subtitulo">
-              Pregunta {preguntaActual + 1} de {test.totalPreguntas}
+              Pregunta {preguntaActual + 1} de {TEST_DATA.totalPreguntas}
             </p>
           </div>
           <div className="test-progress-indicator">
@@ -234,7 +248,7 @@ const VistaEvaluado = () => {
             ))}
           </div>
 
-          {preguntaActual < test.preguntas.length - 1 ? (
+          {preguntaActual < TEST_DATA.preguntas.length - 1 ? (
             <button
               className="btn btn-primary"
               onClick={handleSiguiente}

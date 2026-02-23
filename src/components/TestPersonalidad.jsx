@@ -2,85 +2,83 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./TestPersonalidad.css";
 
+// Datos estáticos hoisted al nivel módulo (rendering-hoist-jsx)
+const PERSONALIDADES = [
+  { id: 1, nombre: "Artístico", color: "#F59E0B" },
+  { id: 2, nombre: "Realista", color: "#10B981" },
+  { id: 3, nombre: "Social", color: "#EC4899" },
+  { id: 4, nombre: "Investigativo", color: "#8B5CF6" },
+  { id: 5, nombre: "Emprendedor", color: "#EF4444" },
+  { id: 6, nombre: "Convencional", color: "#3B82F6" },
+];
+
+const PREGUNTAS_POR_BLOQUE = {
+  1: [
+    "¿Te gusta expresarte a través del arte, música o escritura?",
+    "¿Disfrutas crear cosas nuevas y originales?",
+    "¿Prefieres trabajar en proyectos creativos?",
+    "¿Te sientes cómodo improvisando y siendo espontáneo?",
+    "¿Valoras la estética y el diseño en tu entorno?",
+    "¿Te gusta experimentar con diferentes formas de expresión?",
+  ],
+  2: [
+    "¿Prefieres trabajar con herramientas y maquinaria?",
+    "¿Te gusta realizar actividades físicas y prácticas?",
+    "¿Disfrutas trabajar al aire libre?",
+    "¿Prefieres tareas concretas con resultados tangibles?",
+    "¿Te sientes cómodo con trabajos manuales?",
+    "¿Te gusta construir o reparar cosas?",
+  ],
+  3: [
+    "¿Disfrutas ayudar a otras personas?",
+    "¿Te gusta trabajar en equipo y colaborar?",
+    "¿Prefieres actividades que involucren interacción social?",
+    "¿Te sientes cómodo enseñando o guiando a otros?",
+    "¿Valoras las relaciones interpersonales?",
+    "¿Te gusta participar en actividades comunitarias?",
+  ],
+  4: [
+    "¿Disfrutas resolver problemas complejos?",
+    "¿Te gusta investigar y analizar información?",
+    "¿Prefieres actividades que requieran pensamiento crítico?",
+    "¿Te sientes cómodo con conceptos abstractos?",
+    "¿Valoras el conocimiento y el aprendizaje continuo?",
+    "¿Te gusta experimentar y descubrir cosas nuevas?",
+  ],
+  5: [
+    "¿Disfrutas liderar proyectos y equipos?",
+    "¿Te gusta tomar decisiones importantes?",
+    "¿Prefieres actividades que involucren persuasión?",
+    "¿Te sientes cómodo asumiendo riesgos calculados?",
+    "¿Valoras el éxito y los logros?",
+    "¿Te gusta competir y alcanzar metas ambiciosas?",
+  ],
+  6: [
+    "¿Prefieres trabajar con datos y números?",
+    "¿Te gusta seguir procedimientos establecidos?",
+    "¿Disfrutas organizar y clasificar información?",
+    "¿Te sientes cómodo con tareas detalladas y precisas?",
+    "¿Valoras el orden y la estructura?",
+    "¿Te gusta trabajar en ambientes organizados?",
+  ],
+};
+
+const OPCIONES = [
+  { valor: 1, texto: "Sin coincidencia", emoji: "😐" },
+  { valor: 2, texto: "Poco coincidente", emoji: "🙂" },
+  { valor: 3, texto: "Más o menos coincidente", emoji: "😊" },
+  { valor: 4, texto: "Coincidente", emoji: "😃" },
+  { valor: 5, texto: "El más coincidente", emoji: "🤩" },
+];
+
+const TOTAL_PREGUNTAS = 36;
+
+// Nueva escala de opacidad: 1=40%, 2=55%, 3=70%, 4=85%, 5=100%
+const OPACIDAD_ESCALA = [0.4, 0.55, 0.7, 0.85, 1.0];
+const calcularOpacidad = (valor) => (valor ? OPACIDAD_ESCALA[valor - 1] : 1.0);
+
 const TestPersonalidad = () => {
   const navigate = useNavigate();
-
-  // Definición de personalidades y sus bloques
-  const personalidades = [
-    { id: 1, nombre: "Artístico", color: "#F59E0B" },
-    { id: 2, nombre: "Realista", color: "#10B981" },
-    { id: 3, nombre: "Social", color: "#EC4899" },
-    { id: 4, nombre: "Investigativo", color: "#8B5CF6" },
-    { id: 5, nombre: "Emprendedor", color: "#EF4444" },
-    { id: 6, nombre: "Convencional", color: "#3B82F6" },
-  ];
-
-  // Preguntas de ejemplo para cada bloque (6 preguntas por bloque)
-  const preguntasPorBloque = {
-    1: [
-      // Artístico
-      "¿Te gusta expresarte a través del arte, música o escritura?",
-      "¿Disfrutas crear cosas nuevas y originales?",
-      "¿Prefieres trabajar en proyectos creativos?",
-      "¿Te sientes cómodo improvisando y siendo espontáneo?",
-      "¿Valoras la estética y el diseño en tu entorno?",
-      "¿Te gusta experimentar con diferentes formas de expresión?",
-    ],
-    2: [
-      // Realista
-      "¿Prefieres trabajar con herramientas y maquinaria?",
-      "¿Te gusta realizar actividades físicas y prácticas?",
-      "¿Disfrutas trabajar al aire libre?",
-      "¿Prefieres tareas concretas con resultados tangibles?",
-      "¿Te sientes cómodo con trabajos manuales?",
-      "¿Te gusta construir o reparar cosas?",
-    ],
-    3: [
-      // Social
-      "¿Disfrutas ayudar a otras personas?",
-      "¿Te gusta trabajar en equipo y colaborar?",
-      "¿Prefieres actividades que involucren interacción social?",
-      "¿Te sientes cómodo enseñando o guiando a otros?",
-      "¿Valoras las relaciones interpersonales?",
-      "¿Te gusta participar en actividades comunitarias?",
-    ],
-    4: [
-      // Investigativo
-      "¿Disfrutas resolver problemas complejos?",
-      "¿Te gusta investigar y analizar información?",
-      "¿Prefieres actividades que requieran pensamiento crítico?",
-      "¿Te sientes cómodo con conceptos abstractos?",
-      "¿Valoras el conocimiento y el aprendizaje continuo?",
-      "¿Te gusta experimentar y descubrir cosas nuevas?",
-    ],
-    5: [
-      // Emprendedor
-      "¿Disfrutas liderar proyectos y equipos?",
-      "¿Te gusta tomar decisiones importantes?",
-      "¿Prefieres actividades que involucren persuasión?",
-      "¿Te sientes cómodo asumiendo riesgos calculados?",
-      "¿Valoras el éxito y los logros?",
-      "¿Te gusta competir y alcanzar metas ambiciosas?",
-    ],
-    6: [
-      // Convencional
-      "¿Prefieres trabajar con datos y números?",
-      "¿Te gusta seguir procedimientos establecidos?",
-      "¿Disfrutas organizar y clasificar información?",
-      "¿Te sientes cómodo con tareas detalladas y precisas?",
-      "¿Valoras el orden y la estructura?",
-      "¿Te gusta trabajar en ambientes organizados?",
-    ],
-  };
-
-  // Opciones de respuesta
-  const opciones = [
-    { valor: 1, texto: "Sin coincidencia", emoji: "😐" },
-    { valor: 2, texto: "Poco coincidente", emoji: "🙂" },
-    { valor: 3, texto: "Más o menos coincidente", emoji: "😊" },
-    { valor: 4, texto: "Coincidente", emoji: "😃" },
-    { valor: 5, texto: "El más coincidente", emoji: "🤩" },
-  ];
 
   // Estados
   const [bloqueActual, setBloqueActual] = useState(1);
@@ -90,39 +88,44 @@ const TestPersonalidad = () => {
   const [animando, setAnimando] = useState(false);
   const [hoverOpcion, setHoverOpcion] = useState(null);
 
-  // Calcular progreso total
-  const totalPreguntas = 36;
+  // Calcular progreso total (valores derivados durante el render)
   const preguntasRespondidas = Object.keys(respuestas).length;
-  const progresoTotal = (preguntasRespondidas / totalPreguntas) * 100;
+  const progresoTotal = (preguntasRespondidas / TOTAL_PREGUNTAS) * 100;
 
   // Manejar selección de respuesta
   const handleRespuesta = (valor) => {
     const key = `${bloqueActual}-${preguntaActual}`;
-    setRespuestas({ ...respuestas, [key]: valor });
+    // Forma funcional para evitar stale closures (rerender-functional-setstate)
+    setRespuestas((prev) => ({ ...prev, [key]: valor }));
 
     // Avanzar a la siguiente pregunta
     setTimeout(() => {
-      if (preguntaActual < 5) {
-        // Siguiente pregunta del mismo bloque
-        setPreguntaActual(preguntaActual + 1);
-      } else if (bloqueActual < 6) {
-        // Cambio de bloque - activar animación
-        setAnimando(true);
-        setTimeout(() => {
-          setBloqueActual(bloqueActual + 1);
-          setPreguntaActual(0);
-          setTimeout(() => setAnimando(false), 50);
-        }, 300);
-      } else {
-        // Test completado
-        calcularResultados();
-      }
+      // Leemos el estado actual dentro del callback (rerender-functional-setstate)
+      setPreguntaActual((pActual) => {
+        if (pActual < 5) {
+          return pActual + 1;
+        }
+        // Necesita cambio de bloque — gestionamos con setBloqueActual funcional
+        setBloqueActual((bActual) => {
+          if (bActual < 6) {
+            setAnimando(true);
+            setTimeout(() => {
+              setTimeout(() => setAnimando(false), 50);
+            }, 300);
+            return bActual + 1;
+          }
+          // Test completado
+          calcularResultados();
+          return bActual;
+        });
+        return 0; // reinicia pregunta al cambiar de bloque
+      });
     }, 300);
   };
 
   // Calcular resultados
   const calcularResultados = () => {
-    const puntajes = personalidades.map((p) => {
+    const puntajes = PERSONALIDADES.map((p) => {
       let suma = 0;
       for (let i = 0; i < 6; i++) {
         const key = `${p.id}-${i}`;
@@ -147,25 +150,23 @@ const TestPersonalidad = () => {
     setMostrarResultados(true);
   };
 
-  // Navegar a resultados
+  // Navegar al siguiente test (Perfil de Intereses)
   const irAResultados = () => {
-    // Aquí navegarías a la pantalla de resultados
-    console.log("Navegando a resultados...");
-    // navigate('/evaluado/resultados-personalidad');
+    navigate("/evaluado/test-intereses");
   };
 
-  // Retroceder
+  // Retroceder (rerender-functional-setstate)
   const handleRetroceder = () => {
-    if (preguntaActual > 0) {
-      setPreguntaActual(preguntaActual - 1);
-    } else if (bloqueActual > 1) {
-      setBloqueActual(bloqueActual - 1);
-      setPreguntaActual(5);
-    }
+    setPreguntaActual((pActual) => {
+      if (pActual > 0) return pActual - 1;
+      // Al inicio de bloque, retroceder al bloque anterior
+      setBloqueActual((bActual) => (bActual > 1 ? bActual - 1 : bActual));
+      return 5; // última pregunta del bloque anterior
+    });
   };
 
-  const personalidadActual = personalidades[bloqueActual - 1];
-  const preguntaTexto = preguntasPorBloque[bloqueActual][preguntaActual];
+  const personalidadActual = PERSONALIDADES[bloqueActual - 1];
+  const preguntaTexto = PREGUNTAS_POR_BLOQUE[bloqueActual][preguntaActual];
   const respuestaActual = respuestas[`${bloqueActual}-${preguntaActual}`];
 
   if (mostrarResultados) {
@@ -188,10 +189,10 @@ const TestPersonalidad = () => {
           <h1>¡Test Completado!</h1>
           <p>Has respondido todas las preguntas del test de personalidad.</p>
           <p className="completado-stats">
-            <strong>{totalPreguntas}</strong> preguntas respondidas
+            <strong>{TOTAL_PREGUNTAS}</strong> preguntas respondidas
           </p>
           <button className="btn btn-primary" onClick={irAResultados}>
-            Ver Resultados
+            Continuar el Test
             <svg
               width="20"
               height="20"
@@ -220,7 +221,7 @@ const TestPersonalidad = () => {
         <div className="test-progreso-total">
           <div className="progreso-texto">
             <span>
-              {preguntasRespondidas} de {totalPreguntas}
+              {preguntasRespondidas} de {TOTAL_PREGUNTAS}
             </span>
             <span className="progreso-porcentaje">
               {Math.round(progresoTotal)}%
@@ -259,14 +260,7 @@ const TestPersonalidad = () => {
                   ? hoverOpcion
                   : valorRespuesta;
 
-              // Calcular opacidad según el valor de la respuesta (1-5)
-              // Nueva escala más visible: 1=40%, 2=55%, 3=70%, 4=85%, 5=100%
-              const calcularOpacidad = (valor) => {
-                if (!valor) return 1.0; // Por defecto, 100% (color más intenso)
-                const escala = [0.4, 0.55, 0.7, 0.85, 1.0];
-                return escala[valor - 1];
-              };
-
+              // calcularOpacidad está hoisted al nivel módulo
               const opacidad = calcularOpacidad(valorParaMostrar);
 
               return (
@@ -300,7 +294,7 @@ const TestPersonalidad = () => {
 
         {/* Opciones de respuesta */}
         <div className="opciones-container">
-          {opciones.map((opcion) => (
+          {OPCIONES.map((opcion) => (
             <button
               key={opcion.valor}
               className={`opcion-btn ${respuestaActual === opcion.valor ? "selected" : ""}`}
@@ -353,7 +347,7 @@ const TestPersonalidad = () => {
 
       {/* Indicadores de bloques */}
       <div className="bloques-overview">
-        {personalidades.map((p) => {
+        {PERSONALIDADES.map((p) => {
           const bloqueCompletado = p.id < bloqueActual;
           const bloqueActivo = p.id === bloqueActual;
 

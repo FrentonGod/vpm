@@ -1,0 +1,603 @@
+/* ========================================
+   TEST DE APTITUDES
+   Tema: Índigo (#6366f1) para el test
+         Púrpura (#8756e5) para la pantalla final
+   ======================================== */
+
+/* -----------------------------------------------
+   CONTENEDOR GENERAL
+   ----------------------------------------------- */
+.aptitudes-container {
+  height: 100vh;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 40%, #eef2ff 100%);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: var(--space-sm);
+}
+
+/* -----------------------------------------------
+   HEADER
+   ----------------------------------------------- */
+.aptitudes-header {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-md) var(--space-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid #c7d2fe;
+  flex-shrink: 0;
+}
+
+.aptitudes-header-top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.aptitudes-test-info h2 {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: var(--neutral-900);
+  margin-bottom: 0;
+}
+
+/* --- Progreso --- */
+.aptitudes-progreso-total {
+  margin-top: var(--space-xs);
+}
+
+.aptitudes-progreso-texto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+  font-size: 0.8125rem;
+  color: var(--neutral-600);
+  font-weight: 600;
+}
+
+.aptitudes-progreso-pct {
+  color: #6366f1;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.aptitudes-progreso-bar {
+  height: 8px;
+  background: #e0e7ff;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.aptitudes-progreso-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+/* -----------------------------------------------
+   CONTENIDO PRINCIPAL (fade por pregunta)
+   ----------------------------------------------- */
+.aptitudes-content {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg) var(--space-xl);
+  flex: 1;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid #c7d2fe;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-height: 0;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+.aptitudes-content.animando {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+/* -----------------------------------------------
+   CARD UNIFICADA: número + sentencia
+   ----------------------------------------------- */
+.aptitudes-pregunta-card {
+  background: linear-gradient(135deg, #eef2ff 0%, #f9fafb 100%);
+  border: 2px solid #c7d2fe;
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg) var(--space-xl);
+  margin-bottom: var(--space-lg);
+  flex-shrink: 0;
+}
+
+.aptitudes-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.aptitudes-pregunta-numero {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #6366f1;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.aptitudes-seccion-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--neutral-500);
+  font-style: italic;
+}
+
+.aptitudes-pregunta-texto {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--neutral-900);
+  line-height: 1.4;
+  margin: 0;
+  text-align: center;
+}
+
+/* -----------------------------------------------
+   OPCIONES
+   ----------------------------------------------- */
+.aptitudes-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+  flex-shrink: 0;
+}
+
+.aptitudes-opcion-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--neutral-50);
+  border: 2.5px solid var(--neutral-200);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  /* Sin transform: translateX (rules §7.3) */
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+  text-align: left;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--neutral-700);
+  flex-shrink: 0;
+}
+
+.aptitudes-opcion-btn:hover {
+  background: white;
+  border-color: var(--opcion-color, #6366f1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.aptitudes-opcion-btn.selected {
+  background: white;
+  border-color: var(--opcion-color, #6366f1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+}
+
+.aptitudes-opcion-valor {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.aptitudes-opcion-emoji {
+  font-size: 1.375rem;
+  flex-shrink: 0;
+}
+
+.aptitudes-opcion-texto {
+  flex: 1;
+  color: var(--neutral-800);
+  font-size: 0.9rem;
+}
+
+.aptitudes-check {
+  color: var(--opcion-color, #6366f1);
+  flex-shrink: 0;
+}
+
+/* -----------------------------------------------
+   NAVEGACIÓN
+   ----------------------------------------------- */
+.aptitudes-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 2px solid #e0e7ff;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.aptitudes-nav-hint {
+  font-size: 0.8125rem;
+  color: var(--neutral-400);
+  font-style: italic;
+  text-align: center;
+  flex: 1;
+}
+
+/* -----------------------------------------------
+   MINI-MAPA
+   ----------------------------------------------- */
+.aptitudes-minimap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: var(--space-xs) var(--space-sm);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #c7d2fe;
+}
+
+.minimap-dot-apt {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-200);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   PANTALLA DE AGRADECIMIENTO — tema #8756e5 (púrpura)
+   ===================================================== */
+.aptitudes-gracias-wrapper {
+  background: white;
+  border-radius: var(--radius-2xl);
+  max-width: 680px;
+  width: 100%;
+  margin: auto;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabecera con identidad de la academia */
+.aptitudes-gracias-header {
+  background: linear-gradient(135deg, #8756e5 0%, #6d28d9 100%);
+  padding: var(--space-xl) var(--space-2xl);
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  color: white;
+}
+
+.aptitudes-academia-logo {
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.aptitudes-academia-logo svg {
+  color: white;
+}
+
+.aptitudes-academia-marca {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.aptitudes-academia-nombre {
+  font-size: 1.625rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.aptitudes-academia-frase {
+  font-size: 0.9375rem;
+  font-weight: 400;
+  opacity: 0.85;
+  font-style: italic;
+}
+
+/* Cuerpo del mensaje */
+.aptitudes-gracias-cuerpo {
+  padding: var(--space-2xl) var(--space-2xl) var(--space-xl);
+  text-align: center;
+  border-bottom: 2px solid #f3f0ff;
+}
+
+.aptitudes-check-circle {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-xl);
+  animation: scaleInApt 0.5s ease-out;
+}
+
+.aptitudes-check-circle svg {
+  color: #8756e5;
+}
+
+@keyframes scaleInApt {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.aptitudes-gracias-titulo {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--neutral-900);
+  margin-bottom: var(--space-md);
+}
+
+.aptitudes-gracias-texto {
+  font-size: 1.0625rem;
+  color: var(--neutral-600);
+  line-height: 1.65;
+  max-width: 480px;
+  margin: 0 auto var(--space-sm);
+}
+
+.aptitudes-gracias-subtexto {
+  font-size: 0.9375rem;
+  color: var(--neutral-400);
+  font-style: italic;
+}
+
+/* RRSS */
+.aptitudes-gracias-rrss {
+  padding: var(--space-xl) var(--space-2xl) var(--space-2xl);
+  text-align: center;
+}
+
+.aptitudes-rrss-titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--neutral-500);
+  margin-bottom: var(--space-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.aptitudes-rrss-botones {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.aptitudes-rrss-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+  color: white;
+}
+
+.aptitudes-rrss-btn:hover {
+  opacity: 0.88;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.aptitudes-rrss-facebook {
+  background: #1877f2;
+}
+
+.aptitudes-rrss-instagram {
+  background: linear-gradient(
+    45deg,
+    #f09433 0%,
+    #e6683c 25%,
+    #dc2743 50%,
+    #cc2366 75%,
+    #bc1888 100%
+  );
+}
+
+.aptitudes-rrss-whatsapp {
+  background: #25d366;
+}
+
+/* =====================================================
+   RESPONSIVE — TABLET ≤ 768px
+   ===================================================== */
+@media (max-width: 768px) {
+  .aptitudes-container {
+    padding: var(--space-sm);
+  }
+
+  .aptitudes-header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .aptitudes-test-info h2 {
+    font-size: 1.125rem;
+  }
+
+  .aptitudes-content {
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .aptitudes-seccion-label {
+    font-size: 0.75rem;
+  }
+
+  .aptitudes-pregunta-texto {
+    font-size: 1.25rem;
+  }
+
+  .aptitudes-opcion-btn {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .aptitudes-navigation {
+    flex-direction: column-reverse;
+    gap: var(--space-xs);
+  }
+
+  .aptitudes-nav-hint {
+    order: -1;
+  }
+
+  .aptitudes-navigation .btn {
+    width: 100%;
+  }
+
+  .aptitudes-gracias-header {
+    padding: var(--space-lg) var(--space-lg);
+    gap: var(--space-md);
+  }
+
+  .aptitudes-academia-nombre {
+    font-size: 1.25rem;
+  }
+
+  .aptitudes-gracias-cuerpo {
+    padding: var(--space-xl) var(--space-lg) var(--space-lg);
+  }
+
+  .aptitudes-gracias-titulo {
+    font-size: 1.75rem;
+  }
+
+  .aptitudes-gracias-rrss {
+    padding: var(--space-lg);
+  }
+
+  .aptitudes-rrss-botones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .aptitudes-rrss-btn {
+    justify-content: center;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE — MÓVIL ≤ 480px
+   ===================================================== */
+@media (max-width: 480px) {
+  .aptitudes-container {
+    padding: var(--space-xs);
+    gap: 4px;
+  }
+
+  .aptitudes-header {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .aptitudes-test-info h2 {
+    font-size: 0.9375rem;
+  }
+
+  .aptitudes-content {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .aptitudes-pregunta-card {
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .aptitudes-pregunta-texto {
+    font-size: 1.0625rem;
+  }
+
+  .aptitudes-opciones {
+    gap: 6px;
+    margin-bottom: var(--space-sm);
+  }
+
+  .aptitudes-opcion-btn {
+    padding: 6px var(--space-xs);
+    gap: var(--space-xs);
+  }
+
+  .aptitudes-opcion-valor {
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+  }
+
+  .aptitudes-opcion-emoji {
+    font-size: 1.125rem;
+  }
+
+  .aptitudes-opcion-texto {
+    font-size: 0.8125rem;
+  }
+
+  .aptitudes-minimap {
+    gap: 3px;
+    padding: 6px;
+  }
+
+  .minimap-dot-apt {
+    width: 6px;
+    height: 6px;
+  }
+
+  .aptitudes-academia-logo {
+    width: 52px;
+    height: 52px;
+  }
+
+  .aptitudes-academia-nombre {
+    font-size: 1.0625rem;
+  }
+
+  .aptitudes-academia-frase {
+    font-size: 0.8125rem;
+  }
+
+  .aptitudes-gracias-titulo {
+    font-size: 1.5rem;
+  }
+
+  .aptitudes-gracias-texto {
+    font-size: 0.9375rem;
+  }
+}

@@ -5,6 +5,8 @@ import DashboardAsesor from "./components/DashboardAsesor";
 import FormularioRegistro from "./components/FormularioRegistro";
 import NotFound from "./components/NotFound";
 import TestPersonalidad from "./components/TestPersonalidad";
+import TestIntereses from "./components/TestIntereses";
+import TestAptitudes from "./components/TestAptitudes";
 import "./App.css";
 
 // Componente para proteger rutas del asesor
@@ -48,6 +50,8 @@ function App() {
           path="/evaluado/test-personalidad"
           element={<TestPersonalidad />}
         />
+        <Route path="/evaluado/test-intereses" element={<TestIntereses />} />
+        <Route path="/evaluado/test-aptitudes" element={<TestAptitudes />} />
 
         {/* Ruta 404 - Página no encontrada */}
         <Route path="*" element={<NotFound />} />
