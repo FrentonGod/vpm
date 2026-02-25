@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./TestAptitudes.css";
+import AlertaPaciencia from "./AlertaPaciencia";
 
 // =====================================================================
 // DATOS ESTÁTICOS — hoisted al nivel módulo (rendering-hoist-jsx)
@@ -203,6 +204,9 @@ const PantallaAgradecimiento = () => (
         <p className="aptitudes-gracias-subtexto">
           Pronto recibirás tus resultados de parte de tu orientador.
         </p>
+        <p className="leyenda-institucional leyenda-completado">
+          Banco de preguntas provisto y avalado por COEPESEO y CGEMSySCyT.
+        </p>
       </div>
 
       {/* RRSS */}
@@ -280,8 +284,17 @@ const TestAptitudes = () => {
   const [animando, setAnimando] = useState(false);
   const [hoverOpcion, setHoverOpcion] = useState(null);
 
+  // Bloqueo de transición (evita doble registro)
+  const [bloqueando, setBloqueando] = useState(false);
+  const [mostrarAlerta, setMostrarAlerta] = useState(false);
+  // Detección de respuesta rápida
+  const ultimaRespuestaRef = useRef(null);
+  const UMBRAL_MS = 1500;
+
   // Valores derivados en render (rerender-derived-state-no-effect)
-  const preguntasRespondidas = Object.keys(respuestas).length;
+  // Usamos preguntaActual (síncrono) en lugar de Object.keys(respuestas).length
+  // que puede quedar un ciclo por detrás por el batching de React.
+  const preguntasRespondidas = preguntaActual;
   const progresoTotal = (preguntasRespondidas / TOTAL_PREGUNTAS) * 100;
   const respuestaActual = respuestas[preguntaActual];
 
@@ -297,70 +310,85 @@ const TestAptitudes = () => {
 
   // ---------------------------------------------------------------
   const handleRespuesta = (valor) => {
-    // Estado funcional para evitar stale closures (rerender-functional-setstate)
-    setRespuestas((prev) => ({ ...prev, [preguntaActual]: valor }));
+    if (bloqueando) return;
+
+    const ahora = Date.now();
+    if (
+      ultimaRespuestaRef.current !== null &&
+      ahora - ultimaRespuestaRef.current < UMBRAL_MS
+    ) {
+      setMostrarAlerta(true);
+      return;
+    }
+    ultimaRespuestaRef.current = ahora;
+
+    setBloqueando(true);
+
+    const respuestasActualizadas = { ...respuestas, [preguntaActual]: valor };
+    setRespuestas(respuestasActualizadas);
 
     setTimeout(() => {
       if (preguntaActual < TOTAL_PREGUNTAS - 1) {
-        avanzarConTransicion(() => setPreguntaActual((p) => p + 1));
+        avanzarConTransicion(() => {
+          setPreguntaActual((p) => p + 1);
+          setBloqueando(false);
+        });
       } else {
-        guardarResultados();
+        guardarResultados(respuestasActualizadas);
       }
-    }, 300);
+    }, 600);
   };
 
   // ---------------------------------------------------------------
-  const guardarResultados = () => {
-    setRespuestas((prev) => {
-      const ultimasRespuestas = prev;
-      const totalPuntaje = Object.values(ultimasRespuestas).reduce(
-        (acc, val) => acc + val,
-        0,
-      );
+  // Recibe el mapa completo para evitar stale closure y side effects
+  // dentro de un setState updater (anti-patrón en React)
+  const guardarResultados = (todasLasRespuestas) => {
+    const totalPuntaje = Object.values(todasLasRespuestas).reduce(
+      (acc, val) => acc + val,
+      0,
+    );
 
-      localStorage.setItem(
-        "resultadosAptitudes",
-        JSON.stringify({
-          respuestas: ultimasRespuestas,
-          totalPuntaje,
-          porArea: {
-            verbal: APTITUD_VERBAL.map((_, i) => ({
-              pregunta: APTITUD_VERBAL[i],
-              valor: ultimasRespuestas[i] ?? null,
-            })),
-            logica: APTITUD_LOGICA.map((_, i) => ({
-              pregunta: APTITUD_LOGICA[i],
-              valor: ultimasRespuestas[10 + i] ?? null,
-            })),
-            espacial: APTITUD_ESPACIAL.map((_, i) => ({
-              pregunta: APTITUD_ESPACIAL[i],
-              valor: ultimasRespuestas[20 + i] ?? null,
-            })),
-            manual: APTITUD_MANUAL.map((_, i) => ({
-              pregunta: APTITUD_MANUAL[i],
-              valor: ultimasRespuestas[26 + i] ?? null,
-            })),
-            social: APTITUD_SOCIAL.map((_, i) => ({
-              pregunta: APTITUD_SOCIAL[i],
-              valor: ultimasRespuestas[32 + i] ?? null,
-            })),
-            liderazgo: APTITUD_LIDERAZGO.map((_, i) => ({
-              pregunta: APTITUD_LIDERAZGO[i],
-              valor: ultimasRespuestas[40 + i] ?? null,
-            })),
-            cientifica: APTITUD_CIENTIFICA.map((_, i) => ({
-              pregunta: APTITUD_CIENTIFICA[i],
-              valor: ultimasRespuestas[48 + i] ?? null,
-            })),
-            tecnologica: APTITUD_TECNOLOGICA.map((_, i) => ({
-              pregunta: APTITUD_TECNOLOGICA[i],
-              valor: ultimasRespuestas[54 + i] ?? null,
-            })),
-          },
-        }),
-      );
-      return ultimasRespuestas;
-    });
+    localStorage.setItem(
+      "resultadosAptitudes",
+      JSON.stringify({
+        respuestas: todasLasRespuestas,
+        totalPuntaje,
+        porArea: {
+          verbal: APTITUD_VERBAL.map((_, i) => ({
+            pregunta: APTITUD_VERBAL[i],
+            valor: todasLasRespuestas[i] ?? null,
+          })),
+          logica: APTITUD_LOGICA.map((_, i) => ({
+            pregunta: APTITUD_LOGICA[i],
+            valor: todasLasRespuestas[10 + i] ?? null,
+          })),
+          espacial: APTITUD_ESPACIAL.map((_, i) => ({
+            pregunta: APTITUD_ESPACIAL[i],
+            valor: todasLasRespuestas[20 + i] ?? null,
+          })),
+          manual: APTITUD_MANUAL.map((_, i) => ({
+            pregunta: APTITUD_MANUAL[i],
+            valor: todasLasRespuestas[26 + i] ?? null,
+          })),
+          social: APTITUD_SOCIAL.map((_, i) => ({
+            pregunta: APTITUD_SOCIAL[i],
+            valor: todasLasRespuestas[32 + i] ?? null,
+          })),
+          liderazgo: APTITUD_LIDERAZGO.map((_, i) => ({
+            pregunta: APTITUD_LIDERAZGO[i],
+            valor: todasLasRespuestas[40 + i] ?? null,
+          })),
+          cientifica: APTITUD_CIENTIFICA.map((_, i) => ({
+            pregunta: APTITUD_CIENTIFICA[i],
+            valor: todasLasRespuestas[48 + i] ?? null,
+          })),
+          tecnologica: APTITUD_TECNOLOGICA.map((_, i) => ({
+            pregunta: APTITUD_TECNOLOGICA[i],
+            valor: todasLasRespuestas[54 + i] ?? null,
+          })),
+        },
+      }),
+    );
 
     setMostrarGracias(true);
   };
@@ -378,6 +406,10 @@ const TestAptitudes = () => {
   // ---------------------------------------------------------------
   return (
     <div className="aptitudes-container">
+      <AlertaPaciencia
+        visible={mostrarAlerta}
+        onClose={() => setMostrarAlerta(false)}
+      />
       {/* Header con progreso */}
       <div className="aptitudes-header">
         <div className="aptitudes-header-top">
@@ -520,6 +552,13 @@ const TestAptitudes = () => {
           );
         })}
       </div>
+
+      {/* Pie de página institucional */}
+      <footer className="leyenda-footer">
+        <p className="leyenda-institucional">
+          Banco de preguntas provisto y avalado por COEPESEO y CGEMSySCyT.
+        </p>
+      </footer>
     </div>
   );
 };

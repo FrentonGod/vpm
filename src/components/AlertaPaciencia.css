@@ -1,0 +1,97 @@
+/* ============================================================
+   ALERTA PACIENCIA — overlay bloqueante anti-clics rápidos
+   ============================================================ */
+
+.alerta-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: overlayEntrar 0.18s ease-out both;
+}
+
+@keyframes overlayEntrar {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.alerta-card {
+  background: #fff;
+  border-radius: 1.25rem;
+  padding: 2.5rem 2rem 2rem;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+  animation: cardEntrar 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes cardEntrar {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.alerta-icono {
+  display: block;
+  font-size: 2.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.alerta-titulo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.625rem;
+}
+
+.alerta-mensaje {
+  font-size: 0.9375rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 1.75rem;
+}
+
+.alerta-btn {
+  display: inline-block;
+  padding: 0.75rem 2.25rem;
+  background: var(--accent-primary, #76c4c5);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.625rem;
+  cursor: pointer;
+  transition:
+    background 150ms,
+    transform 100ms;
+}
+
+.alerta-btn:hover {
+  background: var(--accent-primary-hover, #5fb0b1);
+}
+
+.alerta-btn:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 480px) {
+  .alerta-card {
+    padding: 2rem 1.25rem 1.5rem;
+  }
+}

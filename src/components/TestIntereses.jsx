@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./TestIntereses.css";
+import AlertaPaciencia from "./AlertaPaciencia";
 
 // =====================================================================
 // DATOS ESTÁTICOS — hoisted al nivel módulo (rendering-hoist-jsx)
@@ -120,8 +121,17 @@ const TestIntereses = () => {
   // Estado de hover — necesita re-render para actualizar el borde del botón
   const [hoverOpcion, setHoverOpcion] = useState(null);
 
+  // Bloqueo de transición (evita doble registro)
+  const [bloqueando, setBloqueando] = useState(false);
+  const [mostrarAlerta, setMostrarAlerta] = useState(false);
+  // Detección de respuesta rápida
+  const ultimaRespuestaRef = useRef(null);
+  const UMBRAL_MS = 1500;
+
   // Valores derivados en render (rerender-derived-state-no-effect)
-  const preguntasRespondidas = Object.keys(respuestas).length;
+  // preguntaActual es siempre síncrono con el render; Object.keys(respuestas)
+  // puede estar un ciclo por detrás debido al batching de React.
+  const preguntasRespondidas = preguntaActual;
   const progresoTotal = (preguntasRespondidas / TOTAL_PREGUNTAS) * 100;
   const esParte1 = preguntaActual < 50;
   const sentenciaActual = TODAS_SENTENCIAS[preguntaActual];
@@ -142,21 +152,39 @@ const TestIntereses = () => {
 
   // ---------------------------------------------------------------
   const handleRespuesta = (valor) => {
-    // Forma funcional para evitar stale closures (rerender-functional-setstate)
-    setRespuestas((prev) => ({ ...prev, [preguntaActual]: valor }));
+    if (bloqueando) return;
+
+    const ahora = Date.now();
+    if (
+      ultimaRespuestaRef.current !== null &&
+      ahora - ultimaRespuestaRef.current < UMBRAL_MS
+    ) {
+      setMostrarAlerta(true);
+      return;
+    }
+    ultimaRespuestaRef.current = ahora;
+
+    setBloqueando(true);
+
+    const respuestasActualizadas = { ...respuestas, [preguntaActual]: valor };
+    setRespuestas(respuestasActualizadas);
 
     setTimeout(() => {
       if (preguntaActual < TOTAL_PREGUNTAS - 1) {
-        avanzarConTransicion(() => setPreguntaActual((p) => p + 1));
+        avanzarConTransicion(() => {
+          setPreguntaActual((p) => p + 1);
+          setBloqueando(false);
+        });
       } else {
-        calcularResultados();
+        calcularResultados(respuestasActualizadas);
       }
-    }, 300);
+    }, 600);
   };
 
   // ---------------------------------------------------------------
-  const calcularResultados = () => {
-    const totalPuntaje = Object.values(respuestas).reduce(
+  // Recibe el mapa completo para evitar stale closure en la última respuesta
+  const calcularResultados = (todasLasRespuestas) => {
+    const totalPuntaje = Object.values(todasLasRespuestas).reduce(
       (acc, val) => acc + val,
       0,
     );
@@ -164,15 +192,15 @@ const TestIntereses = () => {
     localStorage.setItem(
       "resultadosIntereses",
       JSON.stringify({
-        respuestas,
+        respuestas: todasLasRespuestas,
         totalPuntaje,
         parte1: SENTENCIAS_PARTE1.map((s, i) => ({
           sentencia: s,
-          valor: respuestas[i] ?? null,
+          valor: todasLasRespuestas[i] ?? null,
         })),
         parte2: SENTENCIAS_PARTE2.map((s, i) => ({
           sentencia: s,
-          valor: respuestas[50 + i] ?? null,
+          valor: todasLasRespuestas[50 + i] ?? null,
         })),
       }),
     );
@@ -197,6 +225,10 @@ const TestIntereses = () => {
   if (mostrarResultados) {
     return (
       <div className="test-intereses-container">
+        <AlertaPaciencia
+          visible={mostrarAlerta}
+          onClose={() => setMostrarAlerta(false)}
+        />
         <div className="test-completado-intereses">
           <div className="completado-icon-intereses">
             <svg
@@ -215,6 +247,9 @@ const TestIntereses = () => {
           <p>Has respondido todas las preguntas del perfil de intereses.</p>
           <p className="completado-stats-intereses">
             <strong>{TOTAL_PREGUNTAS}</strong> preguntas respondidas
+          </p>
+          <p className="leyenda-institucional leyenda-completado">
+            Banco de preguntas provisto y avalado por COEPESEO y CGEMSySCyT.
           </p>
           <button
             className="btn btn-primary btn-intereses"
@@ -243,6 +278,10 @@ const TestIntereses = () => {
   // ---------------------------------------------------------------
   return (
     <div className="test-intereses-container">
+      <AlertaPaciencia
+        visible={mostrarAlerta}
+        onClose={() => setMostrarAlerta(false)}
+      />
       {/* Header con progreso */}
       <div className="intereses-header">
         <div className="intereses-header-top">
@@ -412,6 +451,13 @@ const TestIntereses = () => {
           );
         })}
       </div>
+
+      {/* Pie de página institucional */}
+      <footer className="leyenda-footer">
+        <p className="leyenda-institucional">
+          Banco de preguntas provisto y avalado por COEPESEO y CGEMSySCyT.
+        </p>
+      </footer>
     </div>
   );
 };

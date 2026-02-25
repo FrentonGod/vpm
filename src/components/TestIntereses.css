@@ -2,6 +2,49 @@
    TEST DE PERFIL DE INTERESES
    ======================================== */
 
+/* --- TOAST DE PACIENCIA --- */
+.alerta-paciencia {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff7ed;
+  border: 2px solid #fed7aa;
+  border-radius: 1rem;
+  padding: 0.875rem 1.5rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  max-width: 90vw;
+  animation: toastEntrar 0.3s ease-out;
+}
+
+@keyframes toastEntrar {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.alerta-paciencia-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.alerta-paciencia-texto {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #9a3412;
+  line-height: 1.4;
+  margin: 0;
+}
+
 .test-intereses-container {
   height: 100vh;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 40%, #f0fdf4 100%);
@@ -380,6 +423,31 @@
   font-size: 1.25rem !important;
   color: #16a34a !important;
   font-weight: 600 !important;
+}
+
+/* --- LEYENDA INSTITUCIONAL (pie de página) --- */
+.leyenda-footer {
+  width: 100%;
+  padding: var(--space-xs) var(--space-md);
+  border-top: 1px solid var(--neutral-100);
+  background: transparent;
+  text-align: center;
+}
+
+.leyenda-institucional {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: var(--neutral-400);
+  font-style: italic;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+}
+
+.leyenda-completado {
+  font-size: 0.75rem !important;
+  margin-top: var(--space-lg) !important;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--neutral-100);
 }
 
 .btn-intereses {

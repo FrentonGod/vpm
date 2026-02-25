@@ -67,6 +67,8 @@ src/
 ├── main.jsx                        # Punto de entrada
 ├── index.css                       # Design system (variables CSS)
 └── components/
+    ├── AlertaPaciencia.jsx         # Overlay bloqueante anti-clics rápidos (compartido)
+    ├── AlertaPaciencia.css
     ├── LoginAsesor.jsx             # Login del asesor con autocompletado de email
     ├── LoginAsesor.css
     ├── DashboardAsesor.jsx         # Panel del asesor
@@ -109,6 +111,7 @@ src/
 
 - **36 preguntas** en 6 secciones (Artístico, Realista, Social, Investigativo, Emprendedor, Convencional)
 - **Escala 1–5**: Sin coincidencia → El más coincidente
+- Avance automático con **600ms** de delay de transición
 - Guarda `resultadosPersonalidad` en `localStorage`
 
 ### Test de Perfil de Intereses
@@ -117,14 +120,31 @@ src/
 - Parte 1 (50): "¿Qué tanto te gustaría...?"
 - Parte 2 (10): "¿Qué tanto te gustaría trabajar como...?"
 - **Escala 1–4**: Me desagrada → Me gusta mucho
+- Avance automático con **600ms** de delay + fade 180ms
 - Guarda `resultadosIntereses` en `localStorage`
 
 ### Test de Aptitudes
 
 - **60 preguntas** en 8 áreas: Verbal, Lógico-Matemática, Espacial, Manual, Social, Liderazgo, Científica, Tecnológica
 - **Escala 0–4**: Incompetente → Muy competente
+- Avance automático con **600ms** de delay + fade 180ms
 - Guarda `resultadosAptitudes` en `localStorage`
 - Pantalla de agradecimiento con links a redes de MQerK Academy
+
+---
+
+## 🛡️ Guardrails UX — Anti-Clics Rápidos
+
+Los tres tests protegen la integridad de las respuestas con un mecanismo de doble capa en `handleRespuesta`:
+
+| Capa                          | Mecanismo                                                    | Efecto                                                     |
+| ----------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| **1 — Bloqueo de transición** | Estado `bloqueando` (activo ~600–800ms durante la animación) | Ignora clics técnicos durante el avance, sin mensaje       |
+| **2 — Umbral de velocidad**   | `Date.now()` vs `ultimaRespuestaRef` · umbral: **1 500ms**   | Muestra `AlertaPaciencia`, la respuesta **no se registra** |
+
+**`AlertaPaciencia`** es un overlay React (`position: fixed; z-index: 9999`) que no puede ser suprimido por el navegador. El evaluado debe presionar **"Entendido"** para continuar.
+
+La leyenda institucional _"Banco de preguntas provisto y avalado por COEPESEO y CGEMSySCyT"_ se muestra como **pie de página** (`.leyenda-footer`) en los tres tests.
 
 ---
 
@@ -177,5 +197,5 @@ npm run dev
 
 ---
 
-**Versión:** 3.0.0
+**Versión:** 3.1.0
 **Academia:** MQerK Academy — _Vivir para pensar mejor_

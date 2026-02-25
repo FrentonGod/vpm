@@ -27,5 +27,3 @@ dist-ssr
 *.jpg
 
 .unlighthouse
-*.md
-.agent

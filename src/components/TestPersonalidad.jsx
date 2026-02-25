@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./TestPersonalidad.css";
+import AlertaPaciencia from "./AlertaPaciencia";
 
 // Datos estáticos hoisted al nivel módulo (rendering-hoist-jsx)
 const PERSONALIDADES = [
@@ -88,48 +89,66 @@ const TestPersonalidad = () => {
   const [animando, setAnimando] = useState(false);
   const [hoverOpcion, setHoverOpcion] = useState(null);
 
-  // Calcular progreso total (valores derivados durante el render)
-  const preguntasRespondidas = Object.keys(respuestas).length;
+  // Bloqueo de transición (evita doble registro)
+  const [bloqueando, setBloqueando] = useState(false);
+  const [mostrarAlerta, setMostrarAlerta] = useState(false);
+  // Detección de respuesta rápida
+  const ultimaRespuestaRef = useRef(null);
+  const UMBRAL_MS = 1500; // < 1.5 s desde la última respuesta → alerta y no registrar
+
+  // Progreso: número de preguntas ya respondidas antes de la actual
+  // Se deriva de bloqueActual/preguntaActual (siempre síncronos con el render)
+  // (bloqueActual-1)*6 = preguntas completadas en bloques anteriores
+  // + preguntaActual = preguntas completadas dentro del bloque actual
+  const preguntasRespondidas = (bloqueActual - 1) * 6 + preguntaActual;
   const progresoTotal = (preguntasRespondidas / TOTAL_PREGUNTAS) * 100;
 
-  // Manejar selección de respuesta
   const handleRespuesta = (valor) => {
-    const key = `${bloqueActual}-${preguntaActual}`;
-    // Forma funcional para evitar stale closures (rerender-functional-setstate)
-    setRespuestas((prev) => ({ ...prev, [key]: valor }));
+    if (bloqueando) return;
 
-    // Avanzar a la siguiente pregunta
+    // Si la respuesta anterior fue hace menos de UMBRAL_MS → alerta y NO registrar
+    const ahora = Date.now();
+    if (
+      ultimaRespuestaRef.current !== null &&
+      ahora - ultimaRespuestaRef.current < UMBRAL_MS
+    ) {
+      setMostrarAlerta(true);
+      return;
+    }
+    ultimaRespuestaRef.current = ahora;
+
+    setBloqueando(true);
+
+    const key = `${bloqueActual}-${preguntaActual}`;
+    const respuestasActualizadas = { ...respuestas, [key]: valor };
+    setRespuestas(respuestasActualizadas);
+
+    const esUltimaPregunta = preguntaActual === 5;
+    const esUltimoBloque = bloqueActual === 6;
+
     setTimeout(() => {
-      // Leemos el estado actual dentro del callback (rerender-functional-setstate)
-      setPreguntaActual((pActual) => {
-        if (pActual < 5) {
-          return pActual + 1;
-        }
-        // Necesita cambio de bloque — gestionamos con setBloqueActual funcional
-        setBloqueActual((bActual) => {
-          if (bActual < 6) {
-            setAnimando(true);
-            setTimeout(() => {
-              setTimeout(() => setAnimando(false), 50);
-            }, 300);
-            return bActual + 1;
-          }
-          // Test completado
-          calcularResultados();
-          return bActual;
-        });
-        return 0; // reinicia pregunta al cambiar de bloque
-      });
-    }, 300);
+      if (!esUltimaPregunta) {
+        setPreguntaActual(preguntaActual + 1);
+        setBloqueando(false);
+      } else if (!esUltimoBloque) {
+        setAnimando(true);
+        setTimeout(() => setAnimando(false), 350);
+        setBloqueActual(bloqueActual + 1);
+        setPreguntaActual(0);
+        setTimeout(() => setBloqueando(false), 200);
+      } else {
+        calcularResultados(respuestasActualizadas);
+      }
+    }, 600);
   };
 
-  // Calcular resultados
-  const calcularResultados = () => {
+  // Calcular resultados (recibe el mapa completo de respuestas para evitar stale closure)
+  const calcularResultados = (todasLasRespuestas) => {
     const puntajes = PERSONALIDADES.map((p) => {
       let suma = 0;
       for (let i = 0; i < 6; i++) {
         const key = `${p.id}-${i}`;
-        suma += respuestas[key] || 0;
+        suma += todasLasRespuestas[key] || 0;
       }
       return { ...p, puntaje: suma };
     });
@@ -172,6 +191,10 @@ const TestPersonalidad = () => {
   if (mostrarResultados) {
     return (
       <div className="test-personalidad-container">
+        <AlertaPaciencia
+          visible={mostrarAlerta}
+          onClose={() => setMostrarAlerta(false)}
+        />
         <div className="test-completado">
           <div className="completado-icon">
             <svg
@@ -190,6 +213,9 @@ const TestPersonalidad = () => {
           <p>Has respondido todas las preguntas del test de personalidad.</p>
           <p className="completado-stats">
             <strong>{TOTAL_PREGUNTAS}</strong> preguntas respondidas
+          </p>
+          <p className="leyenda-institucional leyenda-completado">
+            Banco de preguntas provisto y avalado por COEPESEO y CGEMSySCyT.
           </p>
           <button className="btn btn-primary" onClick={irAResultados}>
             Continuar el Test
@@ -212,6 +238,10 @@ const TestPersonalidad = () => {
 
   return (
     <div className="test-personalidad-container">
+      <AlertaPaciencia
+        visible={mostrarAlerta}
+        onClose={() => setMostrarAlerta(false)}
+      />
       {/* Header con progreso */}
       <div className="test-header">
         <div className="test-info">
@@ -388,6 +418,13 @@ const TestPersonalidad = () => {
           );
         })}
       </div>
+
+      {/* Pie de página institucional */}
+      <footer className="leyenda-footer">
+        <p className="leyenda-institucional">
+          Banco de preguntas provisto y avalado por COEPESEO y CGEMSySCyT.
+        </p>
+      </footer>
     </div>
   );
 };
