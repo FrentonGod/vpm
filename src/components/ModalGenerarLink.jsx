@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { copyToClipboard } from "../utils/clipboard";
 import "./ModalGenerarLink.css";
 
 const ModalGenerarLink = ({ isOpen, onClose }) => {
   const [linkGenerado, setLinkGenerado] = useState("");
   const [copiado, setCopiado] = useState(false);
   const [qrCode, setQrCode] = useState("");
-  const [nombreEvaluado, setNombreEvaluado] = useState("");
-  const [showQR, setShowQR] = useState(false);
+  const [showQR, setShowQR] = useState(true);
 
   useEffect(() => {
     if (isOpen) {
@@ -20,10 +20,13 @@ const ModalGenerarLink = ({ isOpen, onClose }) => {
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`;
       setQrCode(qrUrl);
 
-      // Reset estados
-      setCopiado(false);
-      setShowQR(false);
-      setNombreEvaluado("");
+      // Copiar link automáticamente al portapapeles
+      copyToClipboard(link).then((result) => {
+        if (result.success) {
+          setCopiado(true);
+          setTimeout(() => setCopiado(false), 1500);
+        }
+      });
 
       // Bloquear scroll del body
       document.body.style.overflow = "hidden";
@@ -43,39 +46,33 @@ const ModalGenerarLink = ({ isOpen, onClose }) => {
   };
 
   const handleCopiarLink = async () => {
-    try {
-      await navigator.clipboard.writeText(linkGenerado);
+    const result = await copyToClipboard(linkGenerado);
+    if (result.success) {
       setCopiado(true);
-      setTimeout(() => setCopiado(false), 3000);
-    } catch (err) {
-      console.error("Error al copiar:", err);
+      setTimeout(() => setCopiado(false), 1500);
+    } else {
+      console.warn("Error al copiar:", result.error);
     }
   };
 
   const handleDescargarQR = () => {
     const link = document.createElement("a");
     link.href = qrCode;
-    link.download = `qr-evaluacion-${nombreEvaluado || "evaluado"}.png`;
+    link.download = "qr-evaluacion.png";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const handleCompartirWhatsApp = () => {
-    const mensaje = nombreEvaluado
-      ? `Hola ${nombreEvaluado}, te comparto el link para realizar tu evaluación vocacional: ${linkGenerado}`
-      : `Te comparto el link para realizar tu evaluación vocacional: ${linkGenerado}`;
-
+    const mensaje = `Te comparto el link para realizar tu evaluación vocacional: ${linkGenerado}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     window.open(whatsappUrl, "_blank");
   };
 
   const handleCompartirEmail = () => {
     const asunto = "Evaluación Vocacional - VPM";
-    const cuerpo = nombreEvaluado
-      ? `Hola ${nombreEvaluado},\n\nTe invito a realizar tu evaluación vocacional a través del siguiente enlace:\n\n${linkGenerado}\n\nSaludos,\nEquipo VPM`
-      : `Te invito a realizar tu evaluación vocacional a través del siguiente enlace:\n\n${linkGenerado}\n\nSaludos,\nEquipo VPM`;
-
+    const cuerpo = `Te invito a realizar tu evaluación vocacional a través del siguiente enlace:\n\n${linkGenerado}\n\nSaludos,\nEquipo VPM`;
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
     window.location.href = mailtoUrl;
   };
@@ -121,24 +118,6 @@ const ModalGenerarLink = ({ isOpen, onClose }) => {
 
         {/* Body */}
         <div className="modal-body">
-          {/* Campo opcional de nombre */}
-          <div className="form-group">
-            <label htmlFor="nombreEvaluado">
-              Nombre del Evaluado (Opcional)
-            </label>
-            <input
-              type="text"
-              id="nombreEvaluado"
-              className="form-input"
-              placeholder="Ej: Juan Pérez"
-              value={nombreEvaluado}
-              onChange={(e) => setNombreEvaluado(e.target.value)}
-            />
-            <p className="form-hint">
-              El nombre se usará para personalizar el mensaje al compartir
-            </p>
-          </div>
-
           {/* Link generado */}
           <div className="link-section">
             <label>Link Generado</label>

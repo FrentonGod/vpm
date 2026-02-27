@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import vpmLogo from "../assets/vpm-logo.svg";
 import "./LoginAsesor.css";
@@ -28,6 +28,18 @@ const LoginAsesor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showDomainSuggestions, setShowDomainSuggestions] = useState(false);
   const [domainSuggestions, setDomainSuggestions] = useState([]);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const suggestionsRef = useRef(null);
+
+  // Scroll automático al item activo cuando se navega con teclado
+  useEffect(() => {
+    if (activeSuggestionIndex >= 0 && suggestionsRef.current) {
+      const activeItem = suggestionsRef.current.children[activeSuggestionIndex];
+      if (activeItem) {
+        activeItem.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [activeSuggestionIndex]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +50,7 @@ const LoginAsesor = () => {
 
     // Lógica de autocompletado para email
     if (name === "email") {
+      setActiveSuggestionIndex(-1);
       const atIndex = value.indexOf("@");
 
       if (atIndex > 0 && atIndex === value.length - 1) {
@@ -79,6 +92,49 @@ const LoginAsesor = () => {
       email: `${username}@${domain}`,
     }));
     setShowDomainSuggestions(false);
+    setActiveSuggestionIndex(-1);
+  };
+
+  const handleEmailKeyDown = (e) => {
+    if (!showDomainSuggestions || domainSuggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveSuggestionIndex((prev) =>
+        prev < domainSuggestions.length - 1 ? prev + 1 : 0,
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveSuggestionIndex((prev) =>
+        prev > 0 ? prev - 1 : domainSuggestions.length - 1,
+      );
+    } else if (e.key === "Enter" && activeSuggestionIndex >= 0) {
+      e.preventDefault();
+      handleDomainSelect(domainSuggestions[activeSuggestionIndex]);
+    } else if (e.key === "Escape") {
+      setShowDomainSuggestions(false);
+      setActiveSuggestionIndex(-1);
+    }
+  };
+
+  const handleEmailFocus = () => {
+    const value = formData.email;
+    const atIndex = value.indexOf("@");
+    if (atIndex <= 0) return;
+
+    const domain = value.substring(atIndex + 1);
+    if (domain.length === 0) {
+      setDomainSuggestions(POPULAR_DOMAINS);
+      setShowDomainSuggestions(true);
+    } else {
+      const filtered = POPULAR_DOMAINS.filter((d) =>
+        d.toLowerCase().startsWith(domain.toLowerCase()),
+      );
+      if (filtered.length > 0) {
+        setDomainSuggestions(filtered);
+        setShowDomainSuggestions(true);
+      }
+    }
   };
 
   const validateForm = () => {
@@ -173,18 +229,23 @@ const LoginAsesor = () => {
                 placeholder="asesor@ejemplo.com"
                 value={formData.email}
                 onChange={handleChange}
+                onFocus={handleEmailFocus}
+                onKeyDown={handleEmailKeyDown}
                 onBlur={() =>
-                  setTimeout(() => setShowDomainSuggestions(false), 200)
+                  setTimeout(() => {
+                    setShowDomainSuggestions(false);
+                    setActiveSuggestionIndex(-1);
+                  }, 200)
                 }
                 autoComplete="off"
               />
               {showDomainSuggestions && domainSuggestions.length > 0 && (
-                <div className="domain-suggestions">
-                  {domainSuggestions.map((domain) => (
+                <div className="domain-suggestions" ref={suggestionsRef}>
+                  {domainSuggestions.map((domain, index) => (
                     <button
                       key={domain}
                       type="button"
-                      className="domain-suggestion-item"
+                      className={`domain-suggestion-item${activeSuggestionIndex === index ? " active" : ""}`}
                       onClick={() => handleDomainSelect(domain)}
                     >
                       <svg

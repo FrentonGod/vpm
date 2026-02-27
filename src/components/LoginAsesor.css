@@ -310,7 +310,8 @@
   border-bottom: none;
 }
 
-.domain-suggestion-item:hover {
+.domain-suggestion-item:hover,
+.domain-suggestion-item.active {
   background: var(--accent-primary-light);
   color: var(--accent-primary);
 }
